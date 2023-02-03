@@ -1,0 +1,20 @@
+no_reply: "<b>You need to reply!</b>"
+not_admin: "<b>Hey, this command is for admins only!</b>"
+not_supergroup: "<b>This command works only in supergroups!!</b>"
+nice_try: "<b>Nice try...</b>"
+tried_to_affect_admin: "<b>I won't restrict admin!</b>"
+bot_insufficient_rights: |
+  <b>Bot doesn't have enough rights!</b>
+  Missing rights:
+
+user_insufficient_rights: |
+  <b>You don't have enough rights!</b>
+  Missing rights:
+
+rights:
+  restrict_members: Ban users
+  promote_members: Add new admins
+
+ban: "<b>Bye-bye!</b> Annihilated user {0}!"
+unban: "Okay, {0} can join again"
+kick: "{0}, go away!"
