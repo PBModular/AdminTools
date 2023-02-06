@@ -18,3 +18,15 @@ rights:
 ban: "<b>Bye-bye!</b> Annihilated user {0}!"
 unban: "Okay, {0} can join again"
 kick: "{0}, go away!"
+
+mute:
+  illegal_usage: | 
+    You should specify time in format
+    <code>#&lt;s/m/h/d&gt;</code>
+    
+    Usage: /mute 5m, /mute 3h
+
+  ok_forever: "<b>Shut up!</b> {user} is muted!"
+  ok: "<b>Shut up!</b> {user} is muted for <b>{time}!</b>"
+
+unmute: "Okay, {user} can speak again"
