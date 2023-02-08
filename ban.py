@@ -1,7 +1,9 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
 from .checks import check_message
-from aiogram.types import Message
+from pyrogram import Client
+from pyrogram.types import Message
+from pyrogram.enums import ChatType, ChatMemberStatus
 
 
 class BanExtension(ModuleExtension):
@@ -10,7 +12,7 @@ class BanExtension(ModuleExtension):
         if member is None:
             return False
 
-        if not member.can_restrict_members and member.status == 'administrator':
+        if not member.privileges.can_restrict_members and member.status == ChatMemberStatus.ADMINISTRATOR:
             await message.reply(
                 self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>"
             )
@@ -19,43 +21,43 @@ class BanExtension(ModuleExtension):
         return True
 
     @command("ban")
-    async def ban_cmd(self, message: Message):
+    async def ban_cmd(self, bot: Client, message: Message):
         if not await self.ban_generic_checks(message):
             return
 
-        await self.bot.ban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
+        await bot.ban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
 
         user = message.reply_to_message.from_user
-        name = f"@{user.username}" if user.username else user.full_name
-        await message.reply(self.S["ban"].format(name))
+        name = f"@{user.username}" if user.username else user.first_name
+        await message.reply(self.S["ban"].format(name), quote=True)
 
     @command("unban")
-    async def unban_cmd(self, message: Message):
-        if not message.chat.type == "supergroup":
+    async def unban_cmd(self, bot: Client, message: Message):
+        if not message.chat.type == ChatType.SUPERGROUP:
             await message.reply(self.S["not_supergroup"])
             return
 
         if not await self.ban_generic_checks(message):
             return
 
-        await self.bot.unban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
+        await bot.unban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
 
         user = message.reply_to_message.from_user
-        name = f"@{user.username}" if user.username else user.full_name
-        await message.reply(self.S["unban"].format(name))
+        name = f"@{user.username}" if user.username else user.first_name
+        await message.reply(self.S["unban"].format(name), quote=True)
 
     @command("kick")
-    async def kick_cmd(self, message: Message):
-        if not message.chat.type == "supergroup":
+    async def kick_cmd(self, bot: Client, message: Message):
+        if not message.chat.type == ChatType.SUPERGROUP:
             await message.reply(self.S["not_supergroup"])
             return
 
         if not await self.ban_generic_checks(message):
             return
 
-        await self.bot.ban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
-        await self.bot.unban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
+        await bot.ban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
+        await bot.unban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
 
         user = message.reply_to_message.from_user
-        name = f"@{user.username}" if user.username else user.full_name
-        await message.reply(self.S["kick"].format(name))
+        name = f"@{user.username}" if user.username else user.first_name
+        await message.reply(self.S["kick"].format(name), quote=True)
