@@ -1,10 +1,11 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
 from .checks import check_message
+from .utils import parse_timedelta
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from pyrogram.enums import ChatMemberStatus
-from datetime import datetime, timedelta
+from datetime import datetime
 from babel.dates import format_timedelta
 
 
@@ -31,19 +32,10 @@ class MuteExtension(ModuleExtension):
         args = message.text.split()
         delta = None
         if len(args) > 1:
-            quantity, unit = int(args[-1][:-1]), args[-1][-1:]
-            if unit not in ("s", "m", "h", "d"):
+            delta = parse_timedelta(args)
+            if delta is None:
                 await message.reply(self.S["mute"]["illegal_usage"])
                 return
-
-            if unit == "d":
-                delta = timedelta(days=quantity)
-            elif unit == "h":
-                delta = timedelta(hours=quantity)
-            elif unit == "m":
-                delta = timedelta(minutes=quantity)
-            elif unit == "s":
-                delta = timedelta(seconds=quantity)
 
         await bot.restrict_chat_member(
             chat_id=message.chat.id,

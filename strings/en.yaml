@@ -15,7 +15,16 @@ rights:
   restrict_members: Ban users
   promote_members: Add new admins
 
-ban: "<b>Bye-bye!</b> Annihilated user {0}!"
+ban:
+  illegal_usage: |
+    You should specify time in format
+    <code>#&lt;s/m/h/d&gt;</code>
+    
+    Usage: /ban 5m, /ban 3h
+
+  ok_forever: "<b>Bye-bye!</b> Annihilated user {user}!"
+  ok: "<b>Bye-bye!</b> Annihilated user {user} for <b>{time}!</b>"
+
 unban: "Okay, {0} can join again"
 kick: "{0}, go away!"
 
