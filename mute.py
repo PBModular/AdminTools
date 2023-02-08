@@ -1,7 +1,7 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
 from .checks import check_message
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from pyrogram.enums import ChatMemberStatus
 from datetime import datetime, timedelta
@@ -23,7 +23,7 @@ class MuteExtension(ModuleExtension):
 
         return True
 
-    @command("mute")
+    @command("mute", filters.group)
     async def mute_cmd(self, bot: Client, message: Message):
         if not await self.mute_generic_checks(message):
             return
@@ -65,7 +65,7 @@ class MuteExtension(ModuleExtension):
                 quote=True
             )
 
-    @command("unmute")
+    @command("unmute", filters.group)
     async def unmute_cmd(self, bot: Client, message: Message):
         if not await self.mute_generic_checks(message):
             return

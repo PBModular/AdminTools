@@ -1,7 +1,7 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
 from .checks import check_message
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
 
@@ -20,7 +20,7 @@ class BanExtension(ModuleExtension):
 
         return True
 
-    @command("ban")
+    @command("ban", filters.group)
     async def ban_cmd(self, bot: Client, message: Message):
         if not await self.ban_generic_checks(message):
             return
@@ -31,7 +31,7 @@ class BanExtension(ModuleExtension):
         name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["ban"].format(name), quote=True)
 
-    @command("unban")
+    @command("unban", filters.group)
     async def unban_cmd(self, bot: Client, message: Message):
         if not message.chat.type == ChatType.SUPERGROUP:
             await message.reply(self.S["not_supergroup"])
@@ -46,7 +46,7 @@ class BanExtension(ModuleExtension):
         name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["unban"].format(name), quote=True)
 
-    @command("kick")
+    @command("kick", filters.group)
     async def kick_cmd(self, bot: Client, message: Message):
         if not message.chat.type == ChatType.SUPERGROUP:
             await message.reply(self.S["not_supergroup"])
