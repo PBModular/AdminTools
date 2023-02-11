@@ -1,7 +1,7 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from .checks import check_message
-from .utils import parse_timedelta
+from ..checks import check_message
+from ..utils import parse_timedelta
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from pyrogram.enums import ChatMemberStatus

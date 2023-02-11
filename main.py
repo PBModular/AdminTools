@@ -3,8 +3,8 @@ from base.mod_ext import ModuleExtension
 from typing import Type
 
 # Extensions
-from .ban import BanExtension
-from .mute import MuteExtension
+from .extensions.ban import BanExtension
+from .extensions.mute import MuteExtension
 
 
 class AdminModule(BaseModule):
