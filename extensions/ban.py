@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from ..checks import check_message
+from ..checks import check_message, parse_user, UserParseStatus
 from ..utils import parse_timedelta
 from pyrogram import Client, filters
 from pyrogram.types import Message
@@ -28,9 +28,11 @@ class BanExtension(ModuleExtension):
         if not await self.ban_generic_checks(message):
             return
 
+        status, user = await parse_user(bot, message)
+
         args = message.text.split()
         delta = None
-        if len(args) > 1:
+        if len(args) > (1 if status == UserParseStatus.OK_REPLY else 2):
             delta = parse_timedelta(args)
             if delta is None:
                 await message.reply(self.S["ban"]["illegal_usage"])
@@ -38,11 +40,10 @@ class BanExtension(ModuleExtension):
 
         await bot.ban_chat_member(
             chat_id=message.chat.id,
-            user_id=message.reply_to_message.from_user.id,
+            user_id=user.id,
             until_date=(datetime.now() + delta) if delta else datetime.fromtimestamp(0)
         )
 
-        user = message.reply_to_message.from_user
         name = f"@{user.username}" if user.username else user.first_name
 
         if delta is None:
@@ -65,9 +66,10 @@ class BanExtension(ModuleExtension):
         if not await self.ban_generic_checks(message):
             return
 
-        await bot.unban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
+        _, user = await parse_user(bot, message)
 
-        user = message.reply_to_message.from_user
+        await bot.unban_chat_member(chat_id=message.chat.id, user_id=user.id)
+
         name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["unban"].format(name), quote=True)
 
@@ -80,9 +82,10 @@ class BanExtension(ModuleExtension):
         if not await self.ban_generic_checks(message):
             return
 
-        await bot.ban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
-        await bot.unban_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)
+        _, user = await parse_user(bot, message)
 
-        user = message.reply_to_message.from_user
+        await bot.ban_chat_member(chat_id=message.chat.id, user_id=user.id)
+        await bot.unban_chat_member(chat_id=message.chat.id, user_id=user.id)
+
         name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["kick"].format(name), quote=True)

@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from ..checks import check_message
+from ..checks import check_message, parse_user, UserParseStatus
 from ..utils import parse_timedelta
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
@@ -29,9 +29,11 @@ class MuteExtension(ModuleExtension):
         if not await self.mute_generic_checks(message):
             return
 
+        status, user = await parse_user(bot, message)
+
         args = message.text.split()
         delta = None
-        if len(args) > 1:
+        if len(args) > (1 if status == UserParseStatus.OK_REPLY else 2):
             delta = parse_timedelta(args)
             if delta is None:
                 await message.reply(self.S["mute"]["illegal_usage"])
@@ -39,11 +41,11 @@ class MuteExtension(ModuleExtension):
 
         await bot.restrict_chat_member(
             chat_id=message.chat.id,
-            user_id=message.reply_to_message.from_user.id,
+            user_id=user.id,
             permissions=ChatPermissions(can_send_messages=False),
             until_date=(datetime.now() + delta) if delta else datetime.fromtimestamp(0)
         )
-        user = message.reply_to_message.from_user
+
         name = f"@{user.username}" if user.username else user.first_name
 
         if delta is None:
@@ -62,12 +64,13 @@ class MuteExtension(ModuleExtension):
         if not await self.mute_generic_checks(message):
             return
 
+        _, user = await parse_user(bot, message)
+
         await bot.restrict_chat_member(
             chat_id=message.chat.id,
-            user_id=message.reply_to_message.from_user.id,
+            user_id=user.id,
             permissions=message.chat.permissions
         )
 
-        user = message.reply_to_message.from_user
         name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["unmute"].format(user=name))

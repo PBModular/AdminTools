@@ -3,7 +3,10 @@ from typing import Optional
 
 
 def parse_timedelta(args: list[str]) -> Optional[timedelta]:
-    quantity, unit = int(args[-1][:-1]), args[-1][-1:]
+    try:
+        quantity, unit = int(args[-1][:-1]), args[-1][-1:]
+    except ValueError:
+        return
 
     if unit == "d":
         return timedelta(days=quantity)
