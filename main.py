@@ -6,6 +6,7 @@ from typing import Type
 from .extensions.ban import BanExtension
 from .extensions.mute import MuteExtension
 from .extensions.purge import PurgeExtension
+from .extensions.permissions import PermsExtension
 
 
 class AdminModule(BaseModule):
@@ -14,5 +15,6 @@ class AdminModule(BaseModule):
         return [
             BanExtension,
             MuteExtension,
-            PurgeExtension
+            PurgeExtension,
+            PermsExtension
         ]

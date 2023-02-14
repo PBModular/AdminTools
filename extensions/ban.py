@@ -1,7 +1,7 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from ..checks import check_message, parse_user, UserParseStatus
-from ..utils import parse_timedelta
+from ..checks import ban_check_message
+from ..utils import parse_timedelta, parse_user, UserParseStatus
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
@@ -11,7 +11,7 @@ from babel.dates import format_timedelta
 
 class BanExtension(ModuleExtension):
     async def ban_generic_checks(self, message: Message) -> bool:
-        member = await check_message(self, message)
+        member = await ban_check_message(self, message)
         if member is None:
             return False
 

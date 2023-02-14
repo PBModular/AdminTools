@@ -4,6 +4,9 @@ not_admin: "<b>Hey, this command is for admins only!</b>"
 not_supergroup: "<b>This command works only in supergroups!!</b>"
 nice_try: "<b>Nice try...</b>"
 tried_to_affect_admin: "<b>I won't restrict admin!</b>"
+already_admin: "<b>This user is an admin already, what can I do?</b>"
+typical_user: "<b>Umm... It's a usual user...</b>"
+
 bot_insufficient_rights: |
   <b>Bot doesn't have enough rights!</b>
   Missing rights:
@@ -46,3 +49,8 @@ unmute: "Okay, {user} can speak again"
 purge: |
   <b>Purge finished!</b>
   Deleted {count} messages
+
+promote: "<b>{user} promoted to admin!</b>"
+demote:
+  ok: "<b>{user} demoted to typical user!</b>"
+  err: "<b>I can't grab admin from this user!</b>"
