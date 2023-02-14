@@ -89,3 +89,33 @@ class BanExtension(ModuleExtension):
 
         name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["kick"].format(name), quote=True)
+
+    @command("kickme", filters.group)
+    async def kickme_cmd(self, bot: Client, message: Message):
+        if not message.chat.type == ChatType.SUPERGROUP:
+            await message.reply(self.S["not_supergroup"])
+            return
+
+        await self.banme_cmd(bot, message)
+        await bot.unban_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
+
+    @command("banme", filters.group)
+    async def banme_cmd(self, bot: Client, message: Message):
+        me = await bot.get_me()
+        me_member = await bot.get_chat_member(chat_id=message.chat.id, user_id=me.id)
+        if not me_member.privileges.can_restrict_members:
+            await message.reply(
+                self.S["bot_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>"
+            )
+            return
+
+        user = message.from_user
+        affect_member = await bot.get_chat_member(chat_id=message.chat.id, user_id=user.id)
+        if affect_member.status == ChatMemberStatus.ADMINISTRATOR or affect_member.status == ChatMemberStatus.OWNER:
+            await message.reply(self.S["tried_to_affect_admin"])
+            return
+
+        name = f"@{user.username}" if user.username else user.first_name
+        await message.reply(self.S["affect_self"] + "\n" + self.S["ban"]["ok_forever"].format(user=name))
+
+        await bot.ban_chat_member(chat_id=message.chat.id, user_id=user.id)

@@ -1,6 +1,6 @@
 from pyrogram.types import Message, ChatMember, User
 from pyrogram.enums import ChatMemberStatus, MessageEntityType
-from pyrogram.errors.exceptions.bad_request_400 import UsernameNotOccupied
+from pyrogram.errors.exceptions.bad_request_400 import UsernameNotOccupied, UserNotParticipant
 from pyrogram import Client
 from typing import Optional
 from enum import Enum
@@ -39,9 +39,14 @@ async def check_message(self, message: Message) -> Optional[ChatMember]:
             self.S["bot_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>"
         )
 
-    affect_member = await self.bot.get_chat_member(
-        chat_id=message.chat.id, user_id=user.id
-    )
+    try:
+        affect_member = await self.bot.get_chat_member(
+            chat_id=message.chat.id, user_id=user.id
+        )
+    except UserNotParticipant:
+        await message.reply(self.S["user_not_found"])
+        return
+
     if (affect_member.status == ChatMemberStatus.ADMINISTRATOR or affect_member.status == ChatMemberStatus.OWNER)\
             and not member.status == ChatMemberStatus.OWNER:
         await message.reply(self.S["tried_to_affect_admin"])

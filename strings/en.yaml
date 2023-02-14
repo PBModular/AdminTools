@@ -28,6 +28,7 @@ ban:
 
 unban: "Okay, {0} can join again"
 kick: "{0}, go away!"
+affect_self: "Ну, это твое решение..."
 
 mute:
   illegal_usage: | 
