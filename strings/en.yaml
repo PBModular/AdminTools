@@ -15,6 +15,7 @@ user_insufficient_rights: |
 rights:
   restrict_members: Ban users
   promote_members: Add new admins
+  delete_messages: Delete messages
 
 ban:
   illegal_usage: |
@@ -41,3 +42,7 @@ mute:
   ok: "<b>Shut up!</b> {user} is muted for <b>{time}!</b>"
 
 unmute: "Okay, {user} can speak again"
+
+purge: |
+  <b>Purge finished!</b>
+  Deleted {count} messages

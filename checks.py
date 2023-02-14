@@ -38,6 +38,7 @@ async def check_message(self, message: Message) -> Optional[ChatMember]:
         await message.reply(
             self.S["bot_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>"
         )
+        return
 
     try:
         affect_member = await self.bot.get_chat_member(

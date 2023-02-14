@@ -15,6 +15,7 @@ user_insufficient_rights: |
 rights:
   restrict_members: Блокировка пользователей
   promote_members: Выбор администраторов
+  delete_messages: Удаление сообщений
 
 ban:
   illegal_usage: |
@@ -41,3 +42,7 @@ mute:
   ok: "<b>Помолчи!</b> {user} заглушен на <b>{time}!</b>"
 
 unmute: "Ладно, теперь {user} может говорить"
+
+purge: |
+  <b>Чистка завершена!</b>
+  Удалено {count} сообщений
