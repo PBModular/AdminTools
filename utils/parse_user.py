@@ -1,7 +1,7 @@
 from pyrogram import Client
 from pyrogram.types import Message, User
 from pyrogram.enums import MessageEntityType
-from pyrogram.errors.exceptions.bad_request_400 import UsernameNotOccupied
+from pyrogram.errors.exceptions.bad_request_400 import BadRequest
 
 from typing import Optional
 from enum import Enum
@@ -24,7 +24,7 @@ async def parse_user(bot: Client, message: Message) -> (UserParseStatus, Optiona
         elif ent.type == MessageEntityType.MENTION:
             try:
                 user = await bot.get_users(message.text[ent.offset:ent.offset + ent.length])
-            except UsernameNotOccupied:
+            except BadRequest:
                 pass
             has_mention = True
             break
