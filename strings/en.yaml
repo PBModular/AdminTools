@@ -1,6 +1,7 @@
 no_reply: "<b>You need to reply!</b>"
 user_not_found: "<b>Hmm, I can't find this user!</b>"
 not_admin: "<b>Hey, this command is for admins only!</b>"
+not_admin_call: "<b>Hey, this is for admins only!</b>"
 not_supergroup: "<b>This command works only in supergroups!!</b>"
 nice_try: "<b>Nice try...</b>"
 tried_to_affect_admin: "<b>I won't restrict admin!</b>"
@@ -54,3 +55,48 @@ promote: "<b>{user} promoted to admin!</b>"
 demote:
   ok: "<b>{user} demoted to typical user!</b>"
   err: "<b>I can't grab admin from this user!</b>"
+
+warn:
+  msg: "<b>{user} has got a warning!</b> ({cur}/{total})"
+  remove_call: "Administrator {admin} removed {user} warning!"
+  remove_msg: "<b>Okay!</b> Removed one {user} warning ({cur}/{total})"
+  button: "Remove warning 🔐"
+  no_warns: "<b>{user} doesn't have any warnings!</b>"
+  no_warns_call: "{user} doesn't have any warnings!"
+  reset: "<b>All warnings for {user} were reset!</b>"
+  status: "{user} has <b>{cur} of {total}</b> warnings"
+  restrict_header: "<b>This user has crossed the border...</b>"
+  restrictions:
+    ban: banned!
+    tban: banned for {time}!
+    mute: muted!
+    tmute: muted for {time}!
+    kick: kicked!
+
+  set_mode:
+    illegal_usage: |
+      You should specify mode and time (optional) in format
+      <code>&lt;mode&gt; #&lt;s/m/h/d&gt;</code>
+      
+      Modes: <code>ban kick mute</code>
+      Usage:
+      /setwarnmode kick
+      /setwarnmode ban 2h
+      /setwarnmode mute 15m
+
+    ok_header: <b>Restriction mode changed!</b>
+    modes:
+      ban: Ban
+      kick: Kick
+      mute: Mute
+    timed: "for {time}"
+
+  set_limit:
+    illegal_usage: |
+      You should specify maximum warnings count
+      
+      Usage: /setwarnlimit 10
+
+    ok: |
+      <b>Warnings limit changed!</b>
+      Current value: {total}

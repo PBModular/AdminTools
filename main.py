@@ -7,6 +7,10 @@ from .extensions.ban import BanExtension
 from .extensions.mute import MuteExtension
 from .extensions.purge import PurgeExtension
 from .extensions.permissions import PermsExtension
+from .extensions.warns import WarnsExtension
+
+# DB
+from .db import Base
 
 
 class AdminModule(BaseModule):
@@ -16,5 +20,10 @@ class AdminModule(BaseModule):
             BanExtension,
             MuteExtension,
             PurgeExtension,
-            PermsExtension
+            PermsExtension,
+            WarnsExtension
         ]
+    
+    @property
+    def db_meta(self):
+        return Base.metadata
