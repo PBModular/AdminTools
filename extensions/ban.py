@@ -10,22 +10,9 @@ from babel.dates import format_timedelta
 
 
 class BanExtension(ModuleExtension):
-    async def ban_generic_checks(self, message: Message) -> bool:
-        member = await ban_check_message(self, message)
-        if member is None:
-            return False
-
-        if not member.privileges.can_restrict_members and member.status == ChatMemberStatus.ADMINISTRATOR:
-            await message.reply(
-                self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>"
-            )
-            return False
-
-        return True
-
     @command("ban", filters.group)
     async def ban_cmd(self, bot: Client, message: Message):
-        if not await self.ban_generic_checks(message):
+        if await ban_check_message(self, message) is None:
             return
 
         status, user = await parse_user(bot, message)
@@ -63,10 +50,9 @@ class BanExtension(ModuleExtension):
             await message.reply(self.S["not_supergroup"])
             return
 
-        if not await self.ban_generic_checks(message):
+        user = await ban_check_message(self, message)
+        if user is None:
             return
-
-        _, user = await parse_user(bot, message)
 
         await bot.unban_chat_member(chat_id=message.chat.id, user_id=user.id)
 
@@ -79,10 +65,9 @@ class BanExtension(ModuleExtension):
             await message.reply(self.S["not_supergroup"])
             return
 
-        if not await self.ban_generic_checks(message):
+        user = await ban_check_message(self, message)
+        if user is None:
             return
-
-        _, user = await parse_user(bot, message)
 
         await bot.ban_chat_member(chat_id=message.chat.id, user_id=user.id)
         await bot.unban_chat_member(chat_id=message.chat.id, user_id=user.id)

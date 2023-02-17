@@ -4,29 +4,14 @@ from ..checks import ban_check_message
 from ..utils import parse_timedelta, parse_user, UserParseStatus
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
-from pyrogram.enums import ChatMemberStatus
 from datetime import datetime
 from babel.dates import format_timedelta
 
 
 class MuteExtension(ModuleExtension):
-    async def checks(self, message: Message) -> bool:
-        member = await ban_check_message(self, message)
-        if member is None:
-            return False
-
-        if not member.privileges.can_restrict_members and member.status == ChatMemberStatus.ADMINISTRATOR:
-            await message.reply(
-                self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>",
-                quote=True
-            )
-            return False
-
-        return True
-
     @command("mute", filters.group)
     async def mute_cmd(self, bot: Client, message: Message):
-        if not await self.checks(message):
+        if await ban_check_message(self, message) is None:
             return
 
         status, user = await parse_user(bot, message)
@@ -61,10 +46,9 @@ class MuteExtension(ModuleExtension):
 
     @command("unmute", filters.group)
     async def unmute_cmd(self, bot: Client, message: Message):
-        if not await self.checks(message):
+        user = await ban_check_message(self, message)
+        if user is None:
             return
-
-        _, user = await parse_user(bot, message)
 
         await bot.restrict_chat_member(
             chat_id=message.chat.id,
