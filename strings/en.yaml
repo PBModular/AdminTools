@@ -1,3 +1,12 @@
+start:
+  ok: |
+    <b>Nice!</b>
+    AdminTools module now is ready for use in this chat!
+    You can get help using command
+    <code>/help AdminTools</code>
+
+  already: "<b>Everything is set up already!</b>"
+
 no_reply: "<b>You need to reply!</b>"
 user_not_found: "<b>Hmm, I can't find this user!</b>"
 not_admin: "<b>Hey, this command is for admins only!</b>"
@@ -100,3 +109,36 @@ warn:
     ok: |
       <b>Warnings limit changed!</b>
       Current value: {total}
+
+greeting:
+  default: |
+    <b>Hello {user}!</b>
+    Welcome to {chat}!
+
+  switch:
+    illegal_usage: |
+      You have to specify mode after command. Supported are:
+      <code>on off yes no</code>
+      
+      Usage: /welcome off
+
+    ok: "<b>Okayb> Welcome messages are {status}"
+    on: enabled!
+    off: disabled!
+
+  set:
+    illegal_usage: |
+      You have to write text after command of reply a message with text / media
+      
+      Following modificators are supported:
+      <code>{user}</code> - name / username of a user
+      <code>{chat_title}</code> - chat title
+      <code>{chat_username}</code> - chat username
+      <code>{default}</code> - default welcome text, can be embedded into your text
+      
+      Usage: /setwelcome Привет {user}!
+
+    unsupported_media: <b>This type of media is unsupported!</b>
+    ok: <b>Chat welcome text is set up!</b>
+
+  reset: "<b>Okay!</b> Welcome text is reset to default!"

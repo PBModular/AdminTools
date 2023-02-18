@@ -57,17 +57,11 @@ class WarnsExtension(ModuleExtension):
         if user is None:
             return
 
-        db_settings = self.db.session.scalars(select(ChatSettings).filter_by(chat_id=message.chat.id)).first()
+        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
         if db_settings is None:
-            db_settings = ChatSettings(
-                chat_id=message.chat.id,
-                warn_limit=DefaultWarnSettings.limit,
-                warn_restriction=DefaultWarnSettings.restriction,
-                warn_rest_time=DefaultWarnSettings.time
-            )
-            self.db.session.add(db_settings)
+            return
 
-        db_user = self.db.session.scalars(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id)).first()
+        db_user = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
         if db_user is None:
             db_user = Warns(chat_id=message.chat.id, user_id=user.id, count=0)
             self.db.session.add(db_user)
@@ -174,18 +168,12 @@ class WarnsExtension(ModuleExtension):
             await message.reply(self.S["warn"]["no_warns_call"].format(user=name))
             return
 
-        db_settings = self.db.session.scalars(select(ChatSettings).filter_by(chat_id=message.chat.id)).first()
-        if db_settings is None:
-            db_settings = ChatSettings(
-                chat_id=message.chat.id,
-                warn_limit=DefaultWarnSettings.limit,
-                warn_restriction=DefaultWarnSettings.restriction,
-                warn_rest_time=DefaultWarnSettings.time
-            )
-            self.db.session.add(db_settings)
+        warn_limit = self.db.session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
+        if warn_limit is None:
+            return
 
         await message.reply(self.S["warn"]["status"].format(
-            user=name, cur=db_user.count, total=db_settings.warn_limit
+            user=name, cur=db_user.count, total=warn_limit
         ))
 
     @command("resetwarns", filters.group)
@@ -196,7 +184,7 @@ class WarnsExtension(ModuleExtension):
 
         name = f"@{user.username}" if user.username else user.first_name
 
-        db_user = self.db.session.scalars(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id)).first()
+        db_user = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
         if db_user is None or db_user.count == 0:
             await message.reply(self.S["warn"]["no_warns"].format(user=name))
             return
@@ -214,8 +202,11 @@ class WarnsExtension(ModuleExtension):
 
         name = f"@{user.username}" if user.username else user.first_name
 
-        db_settings = self.db.session.scalars(select(ChatSettings).filter_by(chat_id=message.chat.id)).first()
-        db_user = self.db.session.scalars(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id)).first()
+        warn_limit = self.db.session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
+        if warn_limit is None:
+            return
+
+        db_user = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
         if db_user is None or db_user.count == 0:
             await message.reply(self.S["warn"]["no_warns"].format(user=name))
             return
@@ -226,7 +217,7 @@ class WarnsExtension(ModuleExtension):
         await message.reply(self.S["warn"]["remove_msg"].format(
             user=name,
             cur=db_user.count,
-            total=db_settings.warn_limit
+            total=warn_limit
         ))
 
     @command("setwarnmode", filters.group)
@@ -255,18 +246,12 @@ class WarnsExtension(ModuleExtension):
             await message.reply(self.S["warn"]["set_mode"]["illegal_usage"])
             return
 
-        db_settings = self.db.session.scalars(select(ChatSettings).filter_by(chat_id=message.chat.id)).first()
+        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
         if db_settings is None:
-            db_settings = ChatSettings(
-                chat_id=message.chat.id,
-                warn_limit=DefaultWarnSettings.limit,
-                warn_restriction=mode,
-                warn_rest_time=mode_time if mode_time else 0
-            )
-            self.db.session.add(db_settings)
-        else:
-            db_settings.warn_restriction = mode
-            db_settings.warn_rest_time = mode_time if mode_time else 0
+            return
+
+        db_settings.warn_restriction = mode
+        db_settings.warn_rest_time = mode_time if mode_time else 0
 
         self.db.session.commit()
 
@@ -300,18 +285,11 @@ class WarnsExtension(ModuleExtension):
             await message.reply(self.S["warn"]["set_limit"]["illegal_usage"])
             return
 
-        db_settings = self.db.session.scalars(select(ChatSettings).filter_by(chat_id=message.chat.id)).first()
+        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
         if db_settings is None:
-            db_settings = ChatSettings(
-                chat_id=message.chat.id,
-                warn_limit=limit,
-                warn_restriction=DefaultWarnSettings.restriction,
-                warn_rest_time=DefaultWarnSettings.time
-            )
-            self.db.session.add(db_settings)
-        else:
-            db_settings.warn_limit = limit
+            return
 
+        db_settings.warn_limit = limit
         self.db.session.commit()
 
         await message.reply(self.S["warn"]["set_limit"]["ok"].format(total=db_settings.warn_limit))
