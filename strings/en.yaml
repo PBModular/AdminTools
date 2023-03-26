@@ -12,10 +12,10 @@ user_not_found: "<b>Hmm, I can't find this user!</b>"
 not_admin: "<b>Hey, this command is for admins only!</b>"
 not_admin_call: "<b>Hey, this is for admins only!</b>"
 not_supergroup: "<b>This command works only in supergroups!!</b>"
-nice_try: "<b>Nice try...</b>"
+nice_try: "<b>Nice try…</b>"
 tried_to_affect_admin: "<b>I won't restrict admin!</b>"
 already_admin: "<b>This user is an admin already, what can I do?</b>"
-typical_user: "<b>Umm... It's a usual user...</b>"
+typical_user: "<b>Umm… It's a usual user…</b>"
 
 bot_insufficient_rights: |
   <b>Bot doesn't have enough rights!</b>
@@ -34,7 +34,7 @@ ban:
   illegal_usage: |
     You should specify time in format
     <code>#&lt;s/m/h/d&gt;</code>
-    
+
     Usage: /ban 5m, /ban 3h
 
   ok_forever: "<b>Bye-bye!</b> Annihilated user {user}!"
@@ -42,13 +42,13 @@ ban:
 
 unban: "Okay, {0} can join again"
 kick: "{0}, go away!"
-affect_self: "Ну, это твое решение..."
+affect_self: "Well, it's your choice…"
 
 mute:
-  illegal_usage: | 
+  illegal_usage: |
     You should specify time in format
     <code>#&lt;s/m/h/d&gt;</code>
-    
+
     Usage: /mute 5m, /mute 3h
 
   ok_forever: "<b>Shut up!</b> {user} is muted!"
@@ -69,12 +69,12 @@ warn:
   msg: "<b>{user} has got a warning!</b> ({cur}/{total})"
   remove_call: "Administrator {admin} removed {user} warning!"
   remove_msg: "<b>Okay!</b> Removed one {user} warning ({cur}/{total})"
-  button: "Remove warning 🔐"
+  button: "Remove warning \U0001F510"
   no_warns: "<b>{user} doesn't have any warnings!</b>"
   no_warns_call: "{user} doesn't have any warnings!"
   reset: "<b>All warnings for {user} were reset!</b>"
   status: "{user} has <b>{cur} of {total}</b> warnings"
-  restrict_header: "<b>This user has crossed the border...</b>"
+  restrict_header: "<b>This user has crossed the border…</b>"
   restrictions:
     ban: banned!
     tban: banned for {time}!
@@ -86,7 +86,7 @@ warn:
     illegal_usage: |
       You should specify mode and time (optional) in format
       <code>&lt;mode&gt; #&lt;s/m/h/d&gt;</code>
-      
+
       Modes: <code>ban kick mute</code>
       Usage:
       /setwarnmode kick
@@ -103,7 +103,7 @@ warn:
   set_limit:
     illegal_usage: |
       You should specify maximum warnings count
-      
+
       Usage: /setwarnlimit 10
 
     ok: |
@@ -119,7 +119,7 @@ greeting:
     illegal_usage: |
       You have to specify mode after command. Supported are:
       <code>on off yes no</code>
-      
+
       Usage: /welcome off
 
     ok: "<b>Okayb> Welcome messages are {status}"
@@ -129,13 +129,13 @@ greeting:
   set:
     illegal_usage: |
       You have to write text after command of reply a message with text / media
-      
+
       Following modificators are supported:
       <code>{user}</code> - name / username of a user
       <code>{chat_title}</code> - chat title
       <code>{chat_username}</code> - chat username
       <code>{default}</code> - default welcome text, can be embedded into your text
-      
+
       Usage: /setwelcome Привет {user}!
 
     unsupported_media: <b>This type of media is unsupported!</b>
