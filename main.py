@@ -37,19 +37,20 @@ class AdminModule(BaseModule):
 
     async def start_cmd(self, _, message: Message):
         """Initialize database entry for chat"""
-        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
-        if db_settings is not None:
-            await message.reply(self.S["start"]["already"])
-            return
+        async with self.db.session_maker() as session:
+            db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
+            if db_settings is not None:
+                await message.reply(self.S["start"]["already"])
+                return
 
-        db_settings = ChatSettings(
-            chat_id=message.chat.id,
-            warn_limit=DefaultWarnSettings.limit,
-            warn_restriction=DefaultWarnSettings.restriction,
-            warn_rest_time=DefaultWarnSettings.time,
-            greeting_text="{default}"
-        )
-        self.db.session.add(db_settings)
-        self.db.session.commit()
+            db_settings = ChatSettings(
+                chat_id=message.chat.id,
+                warn_limit=DefaultWarnSettings.limit,
+                warn_restriction=DefaultWarnSettings.restriction,
+                warn_rest_time=DefaultWarnSettings.time,
+                greeting_text="{default}"
+            )
+            session.add(db_settings)
+            await session.commit()
 
         await message.reply(self.S["start"]["ok"])

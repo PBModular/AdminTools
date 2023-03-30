@@ -10,7 +10,6 @@ from base.mod_ext import ModuleExtension
 from base.module import command, callback_query
 from ..checks import base_checks
 from ..db import ChatSettings, Warns
-from ..config import DefaultWarnSettings
 from ..utils import parse_time, parse_user, UserParseStatus
 
 import time
@@ -57,71 +56,72 @@ class WarnsExtension(ModuleExtension):
         if user is None:
             return
 
-        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
-        if db_settings is None:
-            return
-
-        db_user = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
-        if db_user is None:
-            db_user = Warns(chat_id=message.chat.id, user_id=user.id, count=0)
-            self.db.session.add(db_user)
-
-        name = f"@{user.username}" if user.username else user.first_name
-
-        db_user.count += 1
-        if db_user.count >= db_settings.warn_limit:
-            text = f"{self.S['warn']['restrict_header']} \n{name} "
-            if db_settings.warn_restriction == "mute":
-                await bot.restrict_chat_member(
-                    chat_id=message.chat.id,
-                    user_id=user.id,
-                    permissions=ChatPermissions(can_send_messages=False),
-                    until_date=datetime.fromtimestamp(time.time() + db_settings.warn_rest_time)
-                )
-                if db_settings.warn_rest_time < 30:
-                    text += self.S["warn"]["restrictions"]["mute"]
-                else:
-                    delta = timedelta(seconds=db_settings.warn_rest_time)
-                    text += self.S["warn"]["restrictions"]["tmute"].format(
-                        time=format_timedelta(delta, locale=self.cur_lang, format="long")
-                    )
-
-            elif db_settings.warn_restriction == "ban":
-                await bot.ban_chat_member(
-                    chat_id=message.chat.id,
-                    user_id=user.id,
-                    until_date=datetime.fromtimestamp(time.time() + db_settings.warn_rest_time)
-                )
-                if db_settings.warn_rest_time < 30:
-                    text += self.S["warn"]["restrictions"]["ban"]
-                else:
-                    delta = timedelta(seconds=db_settings.warn_rest_time)
-                    text += self.S["warn"]["restrictions"]["tban"].format(
-                        time=format_timedelta(delta, locale=self.cur_lang, format="long")
-                    )
-
-            elif db_settings.warn_restriction == "kick":
-                await bot.ban_chat_member(chat_id=message.chat.id, user_id=user.id)
-                await bot.unban_chat_member(chat_id=message.chat.id, user_id=user.id)
-                text += self.S["warn"]["restrictions"]["kick"]
-
-            else:
-                self.logger.error(f"WTF unsupported restriction for warn!")
+        async with self.db.session_maker() as session:
+            db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
+            if db_settings is None:
                 return
 
-            await message.reply(text)
-            self.db.session.delete(db_user)
+            db_user = await session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
+            if db_user is None:
+                db_user = Warns(chat_id=message.chat.id, user_id=user.id, count=0)
+                session.add(db_user)
 
-        else:
-            keyboard = InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text=self.S["warn"]["button"], callback_data=f"remove_warn:{user.id}")]]
-            )
-            await message.reply(
-                self.S["warn"]["msg"].format(user=name, cur=db_user.count, total=db_settings.warn_limit),
-                reply_markup=keyboard
-            )
+            name = f"@{user.username}" if user.username else user.first_name
 
-        self.db.session.commit()
+            db_user.count += 1
+            if db_user.count >= db_settings.warn_limit:
+                text = f"{self.S['warn']['restrict_header']} \n{name} "
+                if db_settings.warn_restriction == "mute":
+                    await bot.restrict_chat_member(
+                        chat_id=message.chat.id,
+                        user_id=user.id,
+                        permissions=ChatPermissions(can_send_messages=False),
+                        until_date=datetime.fromtimestamp(time.time() + db_settings.warn_rest_time)
+                    )
+                    if db_settings.warn_rest_time < 30:
+                        text += self.S["warn"]["restrictions"]["mute"]
+                    else:
+                        delta = timedelta(seconds=db_settings.warn_rest_time)
+                        text += self.S["warn"]["restrictions"]["tmute"].format(
+                            time=format_timedelta(delta, locale=self.cur_lang, format="long")
+                        )
+
+                elif db_settings.warn_restriction == "ban":
+                    await bot.ban_chat_member(
+                        chat_id=message.chat.id,
+                        user_id=user.id,
+                        until_date=datetime.fromtimestamp(time.time() + db_settings.warn_rest_time)
+                    )
+                    if db_settings.warn_rest_time < 30:
+                        text += self.S["warn"]["restrictions"]["ban"]
+                    else:
+                        delta = timedelta(seconds=db_settings.warn_rest_time)
+                        text += self.S["warn"]["restrictions"]["tban"].format(
+                            time=format_timedelta(delta, locale=self.cur_lang, format="long")
+                        )
+
+                elif db_settings.warn_restriction == "kick":
+                    await bot.ban_chat_member(chat_id=message.chat.id, user_id=user.id)
+                    await bot.unban_chat_member(chat_id=message.chat.id, user_id=user.id)
+                    text += self.S["warn"]["restrictions"]["kick"]
+
+                else:
+                    self.logger.error(f"WTF unsupported restriction for warn!")
+                    return
+
+                await message.reply(text)
+                await session.delete(db_user)
+
+            else:
+                keyboard = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(text=self.S["warn"]["button"], callback_data=f"remove_warn:{user.id}")]]
+                )
+                await message.reply(
+                    self.S["warn"]["msg"].format(user=name, cur=db_user.count, total=db_settings.warn_limit),
+                    reply_markup=keyboard
+                )
+
+            await session.commit()
 
     @callback_query(filters.regex("remove_warn"))
     async def remove_warn(self, bot: Client, call: CallbackQuery):
@@ -134,13 +134,14 @@ class WarnsExtension(ModuleExtension):
         user = await bot.get_users(user_id)
         user_name = f"@{user.username}" if user.username else user.first_name
 
-        db_user: Warns = self.db.session.scalar(select(Warns).filter_by(chat_id=call.message.chat.id, user_id=user_id))
-        if db_user is None or db_user.count == 0:
-            await call.answer(self.S["warn"]["no_warns_call"].format(user=user_name))
-            return
+        async with self.db.session_maker() as session:
+            db_user: Warns = await session.scalar(select(Warns).filter_by(chat_id=call.message.chat.id, user_id=user_id))
+            if db_user is None or db_user.count == 0:
+                await call.answer(self.S["warn"]["no_warns_call"].format(user=user_name))
+                return
 
-        db_user.count -= 1
-        self.db.session.commit()
+            db_user.count -= 1
+            await session.commit()
 
         await call.answer()
         admin_name = f"@{call.from_user.username}" if call.from_user.username else call.from_user.first_name
@@ -163,18 +164,19 @@ class WarnsExtension(ModuleExtension):
 
         name = f"@{user.username}" if user.username else user.first_name
 
-        db_user: Warns = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
-        if db_user is None or db_user.count == 0:
-            await message.reply(self.S["warn"]["no_warns_call"].format(user=name))
-            return
+        async with self.db.session_maker() as session:
+            db_user: Warns = await session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
+            if db_user is None or db_user.count == 0:
+                await message.reply(self.S["warn"]["no_warns_call"].format(user=name))
+                return
 
-        warn_limit = self.db.session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
-        if warn_limit is None:
-            return
+            warn_limit = await session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
+            if warn_limit is None:
+                return
 
-        await message.reply(self.S["warn"]["status"].format(
-            user=name, cur=db_user.count, total=warn_limit
-        ))
+            await message.reply(self.S["warn"]["status"].format(
+                user=name, cur=db_user.count, total=warn_limit
+            ))
 
     @command("resetwarns", filters.group)
     async def reset_warns_cmd(self, _, message: Message):
@@ -184,13 +186,14 @@ class WarnsExtension(ModuleExtension):
 
         name = f"@{user.username}" if user.username else user.first_name
 
-        db_user = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
-        if db_user is None or db_user.count == 0:
-            await message.reply(self.S["warn"]["no_warns"].format(user=name))
-            return
+        async with self.db.session_maker() as session:
+            db_user = await session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
+            if db_user is None or db_user.count == 0:
+                await message.reply(self.S["warn"]["no_warns"].format(user=name))
+                return
 
-        db_user.count = 0
-        self.db.session.commit()
+            db_user.count = 0
+            await session.commit()
 
         await message.reply(self.S["warn"]["reset"].format(user=name))
 
@@ -202,23 +205,24 @@ class WarnsExtension(ModuleExtension):
 
         name = f"@{user.username}" if user.username else user.first_name
 
-        warn_limit = self.db.session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
-        if warn_limit is None:
-            return
+        async with self.db.session_maker() as session:
+            warn_limit = await session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
+            if warn_limit is None:
+                return
 
-        db_user = self.db.session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
-        if db_user is None or db_user.count == 0:
-            await message.reply(self.S["warn"]["no_warns"].format(user=name))
-            return
+            db_user = await session.scalar(select(Warns).filter_by(chat_id=message.chat.id, user_id=user.id))
+            if db_user is None or db_user.count == 0:
+                await message.reply(self.S["warn"]["no_warns"].format(user=name))
+                return
 
-        db_user.count -= 1
-        self.db.session.commit()
+            db_user.count -= 1
+            await session.commit()
 
-        await message.reply(self.S["warn"]["remove_msg"].format(
-            user=name,
-            cur=db_user.count,
-            total=warn_limit
-        ))
+            await message.reply(self.S["warn"]["remove_msg"].format(
+                user=name,
+                cur=db_user.count,
+                total=warn_limit
+            ))
 
     @command("setwarnmode", filters.group)
     async def set_warn_mode_cmd(self, bot: Client, message: Message):
@@ -246,14 +250,15 @@ class WarnsExtension(ModuleExtension):
             await message.reply(self.S["warn"]["set_mode"]["illegal_usage"])
             return
 
-        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
-        if db_settings is None:
-            return
+        async with self.db.session_maker() as session:
+            db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
+            if db_settings is None:
+                return
 
-        db_settings.warn_restriction = mode
-        db_settings.warn_rest_time = mode_time if mode_time else 0
+            db_settings.warn_restriction = mode
+            db_settings.warn_rest_time = mode_time if mode_time else 0
 
-        self.db.session.commit()
+            await session.commit()
 
         text = self.S["warn"]["set_mode"]["ok_header"] + "\n" + self.S["warn"]["set_mode"]["modes"][mode]
         if mode_time is not None:
@@ -285,11 +290,12 @@ class WarnsExtension(ModuleExtension):
             await message.reply(self.S["warn"]["set_limit"]["illegal_usage"])
             return
 
-        db_settings = self.db.session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
-        if db_settings is None:
-            return
+        async with self.db.session_maker() as session:
+            db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
+            if db_settings is None:
+                return
 
-        db_settings.warn_limit = limit
-        self.db.session.commit()
+            db_settings.warn_limit = limit
+            await session.commit()
 
-        await message.reply(self.S["warn"]["set_limit"]["ok"].format(total=db_settings.warn_limit))
+            await message.reply(self.S["warn"]["set_limit"]["ok"].format(total=db_settings.warn_limit))
