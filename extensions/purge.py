@@ -1,14 +1,19 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram import filters
+from pyrogram.enums import ChatMemberStatus
 from asyncio import sleep
 
 
 class PurgeExtension(ModuleExtension):
     @command("purge", filters.group)
     async def purge_cmd(self, bot: Client, message: Message):
+        member = await bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
+        if not (member.status == ChatMemberStatus.ADMINISTRATOR or member.status == ChatMemberStatus.OWNER):
+            await message.reply(self.S["not_admin"])
+            return
+
         me = await bot.get_me()
         me_member = await bot.get_chat_member(chat_id=message.chat.id, user_id=me.id)
 
