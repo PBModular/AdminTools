@@ -142,3 +142,15 @@ greeting:
     ok: <b>Chat welcome text is set up!</b>
 
   reset: "<b>Okay!</b> Welcome text is reset to default!"
+
+report:
+  cooldown: Please wait {cooldown_time} seconds before using the command again.
+  not_reply: Please reply to the message you wish to report!
+  yourself: You cannot report yourself!
+  bot: You cannot report a bot!
+  msg: Go to message
+  alert: |
+    User {user} reported {reported_user} in chat {chat_title}
+    <b>Message:</b>
+    <i>{reported_text}</i>
+  sent: Your report has been forwarded to the administrators.

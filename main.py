@@ -11,6 +11,7 @@ from .extensions.purge import PurgeExtension
 from .extensions.permissions import PermsExtension
 from .extensions.warns import WarnsExtension
 from .extensions.triggers import TriggersExtension
+from .extensions.report import ReportExtension
 
 # DB
 from sqlalchemy import select
@@ -28,7 +29,8 @@ class AdminModule(BaseModule):
             PurgeExtension,
             PermsExtension,
             WarnsExtension,
-            TriggersExtension
+            TriggersExtension,
+            ReportExtension
         ]
     
     @property
