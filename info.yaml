@@ -1,7 +1,7 @@
 info:
   name: AdminTools
   author: SanyaPilot
-  version: 0.0.1
+  version: 1.0.1
   src_url: https://github.com/PBModular/AdminTools
   description: Some essential commands for group chat administration
 permissions:
