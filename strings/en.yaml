@@ -122,7 +122,7 @@ greeting:
 
       Usage: /welcome off
 
-    ok: "<b>Okayb> Welcome messages are {status}"
+    ok: "<b>Okay</b> Welcome messages are {status}"
     on: enabled!
     off: disabled!
 
