@@ -1,9 +1,10 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from pyrogram import Client, filters
-from pyrogram.types import Message, User, InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.enums import ChatMembersFilter
+from pyrogram import Client
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.enums import ChatMembersFilter, ChatMemberStatus
 import time
+
 
 class ReportExtension(ModuleExtension):
     report_cooldown = 60
@@ -13,7 +14,7 @@ class ReportExtension(ModuleExtension):
         self.last_report_times = {}
     
     @command("report")
-    async def report_cmd(self, client: Client, message: Message):
+    async def report_cmd(self, bot: Client, message: Message):
         if message.reply_to_message is None:
             await message.reply(self.S["report"]["not_reply"])
             return
@@ -21,12 +22,18 @@ class ReportExtension(ModuleExtension):
         chat_id = message.chat.id
         user_id = message.from_user.id
         reply_user_id = message.reply_to_message.from_user.id
+        is_bot = message.reply_to_message.from_user.is_bot
+        
+        reply_member = await bot.get_chat_member(chat_id=chat_id, user_id=reply_user_id)
+        if reply_member.status == ChatMemberStatus.ADMINISTRATOR and not is_bot or reply_member.status == ChatMemberStatus.OWNER:
+            await message.reply(self.S["report"]["admin"])
+            return
 
         if user_id == reply_user_id:
             await message.reply(self.S["report"]["yourself"])
             return
         
-        if message.reply_to_message.from_user.is_bot:
+        if is_bot:
             await message.reply(self.S["report"]["bot"])
             return
         
@@ -52,19 +59,24 @@ class ReportExtension(ModuleExtension):
             [InlineKeyboardButton(self.S["report"]["msg"], url=button_url)]
         ])
 
-        async for admin in client.get_chat_members(chat_id, filter=ChatMembersFilter.ADMINISTRATORS):
-            if admin.user.is_bot:
+        async for admin in bot.get_chat_members(chat_id, filter=ChatMembersFilter.ADMINISTRATORS):
+            try:
+                if admin.user.is_bot:
+                    continue
+                
+                await bot.send_message(
+                    admin.user.id,
+                    self.S["report"]["alert"].format(
+                        chat_title=chat_title,
+                        user=user,
+                        reported_user=reported_user,
+                        reported_text=reported_text
+                    ),
+                    reply_markup=keyboard
+                )
+                
+            except Exception as e:
+                # self.logger.warning(f"Failed to send report to {admin.user.id}: {e}")
                 continue
-
-            await client.send_message(
-                admin.user.id,
-                self.S["report"]["alert"].format(
-                    chat_title=chat_title,
-                    user=user,
-                    reported_user=reported_user,
-                    reported_text=reported_text
-                ),
-                reply_markup=keyboard
-            )
-
+        
         await message.reply(self.S["report"]["sent"])

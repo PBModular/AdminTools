@@ -146,6 +146,7 @@ greeting:
 report:
   cooldown: Please wait {cooldown_time} seconds before using the command again.
   not_reply: Please reply to the message you wish to report!
+  admin: You cannot report an admin!
   yourself: You cannot report yourself!
   bot: You cannot report a bot!
   msg: Go to message
