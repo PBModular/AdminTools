@@ -92,7 +92,10 @@ report:
   bot: Ви не можете скаржитись на бота!
   msg: Перейти до повідомлення
   alert: |
-    Користувач {user} поскаржився на {reported_user} в чаті {chat_title}
+    Користувач {user} поскаржився на {reported_user} в чаті "<b>{chat_title}<b/>"
     <b>Повідомлення:</b>
     <i>{reported_text}</i>
+  reason: |
+    <b>Причина:</b>
+    {reason}
   sent: Ваша скарга була передана адміністраторам.

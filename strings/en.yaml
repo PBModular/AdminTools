@@ -151,7 +151,10 @@ report:
   bot: You cannot report a bot!
   msg: Go to message
   alert: |
-    User {user} reported {reported_user} in chat {chat_title}
+    User {user} reported {reported_user} in chat "<b>{chat_title}<b/>"
     <b>Message:</b>
     <i>{reported_text}</i>
+  reason: |
+    <b>Reason:</b>
+    {reason}
   sent: Your report has been forwarded to the administrators.

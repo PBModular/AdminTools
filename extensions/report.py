@@ -23,6 +23,7 @@ class ReportExtension(ModuleExtension):
         user_id = message.from_user.id
         reply_user_id = message.reply_to_message.from_user.id
         is_bot = message.reply_to_message.from_user.is_bot
+        reason = " ".join(message.command[1:])
         
         reply_member = await bot.get_chat_member(chat_id=chat_id, user_id=reply_user_id)
         if reply_member.status == ChatMemberStatus.ADMINISTRATOR and not is_bot or reply_member.status == ChatMemberStatus.OWNER:
@@ -64,14 +65,19 @@ class ReportExtension(ModuleExtension):
                 if admin.user.is_bot:
                     continue
                 
+                alert_text = self.S["report"]["alert"].format(
+                    chat_title=chat_title,
+                    user=user,
+                    reported_user=reported_user,
+                    reported_text=reported_text
+                )
+
+                if reason:
+                    alert_text += "\n" + self.S["report"]["reason"].format(reason=reason)
+
                 await bot.send_message(
                     admin.user.id,
-                    self.S["report"]["alert"].format(
-                        chat_title=chat_title,
-                        user=user,
-                        reported_user=reported_user,
-                        reported_text=reported_text
-                    ),
+                    alert_text,
                     reply_markup=keyboard
                 )
                 
