@@ -23,8 +23,13 @@ class ReportExtension(ModuleExtension):
         chat_title = message.chat.title or message.chat.username or message.chat.first_name
         user = message.from_user.mention
         reported_msg = message.reply_to_message_id
+        
+        if message.reply_to_message and message.reply_to_message.text:
+            reported_text = message.reply_to_message.text
+        else:
+            reported_text = message.reply_to_message
+
         reported_user = message.reply_to_message.from_user.mention
-        reported_text = message.reply_to_message.text
         reason = " ".join(message.command[1:])
         
         button_url = f"https://t.me/c/{str(chat_id)[4:]}/{reported_msg}"
@@ -43,7 +48,10 @@ class ReportExtension(ModuleExtension):
                     reported_user=reported_user,
                 )
                 if reported_text:
-                    alert_text += "\n" + self.S["report"]["message"].format(reported_text=reported_text)
+                    if not isinstance(reported_text, str):
+                        await bot.forward_messages(admin.user.id, chat_id, reported_msg)
+                    else:
+                        alert_text += "\n" + self.S["report"]["message"].format(reported_text=reported_text)
                     
                 if reason:
                     alert_text += "\n" + self.S["report"]["reason"].format(reason=reason)
