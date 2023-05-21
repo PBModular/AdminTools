@@ -152,6 +152,7 @@ report:
   msg: Go to message
   alert: |
     User {user} reported {reported_user} in chat "<b>{chat_title}<b/>"
+  message: |
     <b>Message:</b>
     <i>{reported_text}</i>
   reason: |

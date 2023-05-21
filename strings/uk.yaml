@@ -93,6 +93,7 @@ report:
   msg: Перейти до повідомлення
   alert: |
     Користувач {user} поскаржився на {reported_user} в чаті "<b>{chat_title}<b/>"
+  message: |
     <b>Повідомлення:</b>
     <i>{reported_text}</i>
   reason: |

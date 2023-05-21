@@ -152,6 +152,7 @@ report:
   msg: Перейти к сообщению
   alert: |
     Пользователь {user} пожаловался на {reported_user} в чате "<b>{chat_title}<b/>"
+  message: |
     <b>Сообщение:</b>
     <i>{reported_text}</i>
   reason: |
