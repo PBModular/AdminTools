@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from pyrogram import Client
+from pyrogram import Client, errors
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.enums import ChatMembersFilter, ChatMemberStatus
 import time
@@ -77,14 +77,20 @@ class ReportExtension(ModuleExtension):
         user_id = message.from_user.id
         reply_user_id = message.reply_to_message.from_user.id
         is_bot = message.reply_to_message.from_user.is_bot
+
+        try:
+            reply_member = await bot.get_chat_member(chat_id=chat_id, user_id=reply_user_id)
+
+        except errors.UserNotParticipant:
+            await message.reply(self.S["user_not_found"])
+            return False
         
-        reply_member = await bot.get_chat_member(chat_id=chat_id, user_id=reply_user_id)
+        if user_id == reply_user_id or user_id == reply_user_id:
+            await message.reply(self.S["report"]["yourself"])
+            return False
+        
         if reply_member.status == ChatMemberStatus.ADMINISTRATOR and not is_bot or reply_member.status == ChatMemberStatus.OWNER:
             await message.reply(self.S["report"]["admin"])
-            return False
-
-        if user_id == reply_user_id:
-            await message.reply(self.S["report"]["yourself"])
             return False
         
         if is_bot:
