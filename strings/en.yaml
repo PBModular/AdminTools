@@ -159,3 +159,16 @@ report:
     <b>Reason:</b>
     {reason}
   sent: Your report has been forwarded to the administrators.
+
+notes:
+  specify_note_name: Please provide the name of the note!
+  note_not_found: Note not found!
+  notes_list: |
+    <b>A chat notes list:</b>
+    {notes_list}
+  no_notes: No notes in chat.
+  reply_to_message: Reply to the message to add a note!
+  note_save_error: Failed to save the note!
+  media_not_supported: Failed to save the note! The message does not contain text or supported media.
+  note_added: Note <code>{note_name}</code> was added.
+  note_removed: Note <code>{note_name}</code> was deleted.

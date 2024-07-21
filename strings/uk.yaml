@@ -100,3 +100,16 @@ report:
     <b>Причина:</b>
     {reason}
   sent: Ваша скарга була передана адміністраторам.
+
+notes:
+  specify_note_name: Будь ласка, вкажіть назву нотатки!
+  note_not_found: Нотатку не знайдено!
+  notes_list: |
+    <b>Список нотаток у чаті:</b>
+    {notes_list}
+  no_notes: Немає нотаток у чаті.
+  reply_to_message: Відповідайте на повідомлення, щоб додати нотатку!
+  note_save_error: Не вдалося зберегти нотатку!
+  media_not_supported: Не вдалося зберегти нотатку! Повідомлення не містить тексту або підтримуваного медіа.
+  note_added: Нотатку <code>{note_name}</code> додано.
+  note_removed: Нотатку <code>{note_name}</code> видалено.

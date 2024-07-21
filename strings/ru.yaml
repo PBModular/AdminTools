@@ -159,3 +159,16 @@ report:
     <b>Причина:</b>
     {reason}
   sent: Ваша жалоба была передана администраторам.
+
+notes:
+  specify_note_name: Пожалуйста, укажите название заметки!
+  note_not_found: Заметка не найдена!
+  notes_list: |
+    <b>Список заметок в чате:</b>
+    {notes_list}
+  no_notes: Нет заметок в чате.
+  reply_to_message: Ответьте на сообщение, чтобы добавить заметку!
+  note_save_error: Не удалось сохранить заметку!
+  media_not_supported: Не удалось сохранить заметку! Сообщение не содержит текста или поддерживаемого медиа.
+  note_added: Заметка <code>{note_name}</code> добавлена.
+  note_removed: Заметка <code>{note_name}</code> удалена.

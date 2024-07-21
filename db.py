@@ -17,6 +17,14 @@ class ChatSettings(Base):
     greeting_text: Mapped[Optional[str]]
     greeting_file_id: Mapped[Optional[str]]
 
+class Notes(Base):
+    __tablename__ = "notes"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    chat_id: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False)
+    content: Mapped[str] = mapped_column(nullable=False)
+    type: Mapped[str] = mapped_column(nullable=False)
 
 class Warns(Base):
     __tablename__ = "warns"
