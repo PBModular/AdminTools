@@ -21,7 +21,7 @@ class Notes(Base):
     __tablename__ = "notes"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    chat_id: Mapped[str] = mapped_column(nullable=False)
+    chat_id: Mapped[int] = mapped_column(nullable=False)
     name: Mapped[str] = mapped_column(nullable=False)
     content: Mapped[str] = mapped_column(nullable=False)
     type: Mapped[str] = mapped_column(nullable=False)
