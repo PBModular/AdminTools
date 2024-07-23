@@ -97,6 +97,7 @@ class NotesExtension(ModuleExtension):
         else:
             await message.reply(self.S["notes"]["no_notes"])
 
+    @allowed_for(["chat_admins", "chat_owner"])
     @command("addnote")
     async def addnote_cmd(self, bot: Client, message: Message):
         if not message.reply_to_message:
@@ -148,6 +149,7 @@ class NotesExtension(ModuleExtension):
         await self.set_chat_notes(message.chat.id, note_name, note_content, note_type)
         await message.reply(self.S["notes"]["note_added"].format(note_name=note_name))
 
+    @allowed_for(["chat_admins", "chat_owner"])
     @command("rmnote")
     async def rmnote_cmd(self, bot: Client, message: Message):
         try:
