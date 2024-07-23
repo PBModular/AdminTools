@@ -53,38 +53,42 @@ class NotesExtension(ModuleExtension):
         notes = await self.get_chat_notes(message.chat.id)
         note = next((note for note in notes if note.name == note_name), None)
 
-        if note:
-            if note.type == "text":
-                await bot.send_message(message.chat.id, note.content, parse_mode=ParseMode.MARKDOWN)
-            elif note.type == "media":
-                media_id, *caption = note.content.split("\n", 1)
-                caption = caption[0] if caption else None
-                await bot.send_cached_media(message.chat.id, media_id, caption=caption, parse_mode=ParseMode.MARKDOWN)
-            elif note.type == "media_group":
-                media_group = []
-                media_files = note.content.strip().split("\n---\n")
-                caption = ""
-                for media_file in media_files:
-                    if ":" in media_file:
-                        file_type, file_id = media_file.split(":", 1)
-                        if file_type == "photo":
-                            media_group.append(InputMediaPhoto(file_id))
-                        elif file_type == "video":
-                            media_group.append(InputMediaVideo(file_id))
-                        elif file_type == "document":
-                            media_group.append(InputMediaDocument(file_id))
-                        elif file_type == "audio":
-                            media_group.append(InputMediaAudio(file_id))
-                        elif file_type == "animation":
-                            media_group.append(InputMediaAnimation(file_id))
-                    else:
-                        caption = media_file.strip()
-                if media_group:
-                    media_group[-1].caption = caption
-                    media_group[-1].parse_mode = ParseMode.MARKDOWN
-                await bot.send_media_group(message.chat.id, media_group)
-        else:
+        if not note:
             await message.reply(self.S["notes"]["note_not_found"])
+            return
+        
+        await self.send_note(bot, message.chat.id, note)
+
+    async def send_note(self, bot: Client, chat_id, note):
+        if note.type == "text":
+            await bot.send_message(chat_id, note.content, parse_mode=ParseMode.MARKDOWN)
+        elif note.type == "media":
+            media_id, *caption = note.content.split("\n", 1)
+            caption = caption[0] if caption else None
+            await bot.send_cached_media(chat_id, media_id, caption=caption, parse_mode=ParseMode.MARKDOWN)
+        elif note.type == "media_group":
+            media_group = []
+            media_files = note.content.strip().split("\n---\n")
+            caption = ""
+            for media_file in media_files:
+                if ":" in media_file:
+                    file_type, file_id = media_file.split(":", 1)
+                    if file_type == "photo":
+                        media_group.append(InputMediaPhoto(file_id))
+                    elif file_type == "video":
+                        media_group.append(InputMediaVideo(file_id))
+                    elif file_type == "document":
+                        media_group.append(InputMediaDocument(file_id))
+                    elif file_type == "audio":
+                        media_group.append(InputMediaAudio(file_id))
+                    elif file_type == "animation":
+                        media_group.append(InputMediaAnimation(file_id))
+                else:
+                    caption = media_file.strip()
+            if media_group:
+                media_group[-1].caption = caption
+                media_group[-1].parse_mode = ParseMode.MARKDOWN
+            await bot.send_media_group(chat_id, media_group)
 
     @command("notes")
     async def notes_cmd(self, bot: Client, message: Message):
