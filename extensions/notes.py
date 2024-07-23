@@ -57,7 +57,8 @@ class NotesExtension(ModuleExtension):
             if note.type == "text":
                 await bot.send_message(message.chat.id, note.content, parse_mode=ParseMode.MARKDOWN)
             elif note.type == "media":
-                media_id, caption = note.content.split("\n", 1)
+                media_id, *caption = note.content.split("\n", 1)
+                caption = caption[0] if caption else None
                 await bot.send_cached_media(message.chat.id, media_id, caption=caption, parse_mode=ParseMode.MARKDOWN)
             elif note.type == "media_group":
                 media_group = []
@@ -76,8 +77,9 @@ class NotesExtension(ModuleExtension):
                             media_group.append(InputMediaAudio(file_id))
                     else:
                         caption = media_file.strip()
-                media_group[-1].caption = caption
-                media_group[-1].parse_mode = ParseMode.MARKDOWN
+                if media_group:
+                    media_group[-1].caption = caption
+                    media_group[-1].parse_mode = ParseMode.MARKDOWN
                 await bot.send_media_group(message.chat.id, media_group)
         else:
             await message.reply(self.S["notes"]["note_not_found"])
@@ -117,14 +119,15 @@ class NotesExtension(ModuleExtension):
                     if media:
                         file_type = media.__class__.__name__.lower()
                         note_content += f"{file_type}:{media.file_id}\n---\n"
-                if reply_message.caption:
-                    note_content += f"\n{reply_message.caption.markdown}"
                 note_type = "media_group"
             else:
                 media = reply_message.photo or reply_message.video or reply_message.document or reply_message.audio or \
                     reply_message.voice or reply_message.animation or reply_message.sticker
-                note_content = f"{media.file_id}\n{reply_message.caption.markdown or ''}"
+                note_content = f"{media.file_id}"
                 note_type = "media"
+            
+            if reply_message.caption:
+                note_content += f"\n{reply_message.caption.markdown}"
         else:
             await message.reply(self.S["notes"]["media_not_supported"])
             return
