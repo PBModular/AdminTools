@@ -2,7 +2,7 @@ from base.mod_ext import ModuleExtension
 from pyrogram import Client
 from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio, InputMediaAnimation
 from pyrogram.enums import ParseMode
-from base.module import command
+from base.module import command, allowed_for
 from ..db import Notes
 from sqlalchemy import select, exc
 
@@ -89,9 +89,11 @@ class NotesExtension(ModuleExtension):
     @command("notes")
     async def notes_cmd(self, bot: Client, message: Message):
         notes = await self.get_chat_notes(message.chat.id)
+        chat_name = message.chat.title or message.chat.username
         if notes:
-            notes_list = "\n".join([note.name for note in notes])
-            await message.reply(self.S["notes"]["notes_list"].format(notes_list=notes_list))
+            sorted_notes = sorted(note.name for note in notes)
+            notes_list = "\n".join([f"• <code>{note}</code>" for note in sorted_notes])
+            await message.reply(self.S["notes"]["notes_list"].format(notes_list=notes_list, chat_name=chat_name))
         else:
             await message.reply(self.S["notes"]["no_notes"])
 

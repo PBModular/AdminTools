@@ -164,8 +164,10 @@ notes:
   specify_note_name: Пожалуйста, укажите название заметки!
   note_not_found: Заметка не найдена!
   notes_list: |
-    <b>Список заметок в чате:</b>
+    <b>Список заметок в чате {chat_name}:</b>
     {notes_list}
+
+    Вы можете вызвать заметку с помощью команды <code>/note notename</code> или <code>#notename</code>
   no_notes: Нет заметок в чате.
   reply_to_message: Ответьте на сообщение, чтобы добавить заметку!
   note_save_error: Не удалось сохранить заметку!
