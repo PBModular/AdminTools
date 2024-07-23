@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from pyrogram import Client
-from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio
+from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio, InputMediaAnimation
 from pyrogram.enums import ParseMode
 from base.module import command
 from ..db import Notes
@@ -75,6 +75,8 @@ class NotesExtension(ModuleExtension):
                             media_group.append(InputMediaDocument(file_id))
                         elif file_type == "audio":
                             media_group.append(InputMediaAudio(file_id))
+                        elif file_type == "animation":
+                            media_group.append(InputMediaAnimation(file_id))
                     else:
                         caption = media_file.strip()
                 if media_group:
@@ -111,23 +113,32 @@ class NotesExtension(ModuleExtension):
             note_content = reply_message.text.markdown
             note_type = "text"
         elif reply_message.media:
-            if reply_message.media_group_id:
-                media_group = await bot.get_media_group(reply_message.chat.id, reply_message.id)
-                note_content = ""
-                for media_message in media_group:
-                    media = media_message.photo or media_message.video or media_message.document or media_message.audio
-                    if media:
-                        file_type = media.__class__.__name__.lower()
-                        note_content += f"{file_type}:{media.file_id}\n---\n"
-                note_type = "media_group"
+            if reply_message.media_group_id and not reply_message.caption:
+                media = reply_message.photo or reply_message.video or reply_message.document or reply_message.audio or reply_message.animation
+                if media:
+                    note_content = media.file_id
+                    note_type = "media"
+                else:
+                    await message.reply(self.S["notes"]["media_not_supported"])
+                    return
             else:
-                media = reply_message.photo or reply_message.video or reply_message.document or reply_message.audio or \
-                    reply_message.voice or reply_message.animation or reply_message.sticker
-                note_content = f"{media.file_id}"
-                note_type = "media"
-            
-            if reply_message.caption:
-                note_content += f"\n{reply_message.caption.markdown}"
+                if reply_message.media_group_id:
+                    media_group = await bot.get_media_group(reply_message.chat.id, reply_message.id)
+                    note_content = ""
+                    for media_message in media_group:
+                        media = media_message.photo or media_message.video or media_message.document or media_message.audio or reply_message.animation
+                        if media:
+                            file_type = media.__class__.__name__.lower()
+                            note_content += f"{file_type}:{media.file_id}\n---\n"
+                    note_type = "media_group"
+                else:
+                    media = reply_message.photo or reply_message.video or reply_message.document or reply_message.audio or \
+                        reply_message.voice or reply_message.animation or reply_message.sticker
+                    note_content = media.file_id
+                    note_type = "media"
+                
+                if reply_message.caption:
+                    note_content += f"\n{reply_message.caption.markdown}"
         else:
             await message.reply(self.S["notes"]["media_not_supported"])
             return
