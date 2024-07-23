@@ -1,6 +1,7 @@
 from base.mod_ext import ModuleExtension
 from pyrogram import Client
 from pyrogram.types import Message
+from pyrogram.enums import ParseMode
 from base.module import command
 from ..db import Notes
 from sqlalchemy import select, exc
@@ -54,10 +55,10 @@ class NotesExtension(ModuleExtension):
         
         if note:
             if note.type == "text":
-                await bot.send_message(message.chat.id, note.content)
+                await bot.send_message(message.chat.id, note.content, parse_mode=ParseMode.MARKDOWN)
             elif note.type == "media":
                 media_id, caption = note.content.split("\n", 1)
-                await bot.send_cached_media(message.chat.id, media_id, caption=caption)
+                await bot.send_cached_media(message.chat.id, media_id, caption=caption, parse_mode=ParseMode.MARKDOWN)
         else:
             await message.reply(self.S["notes"]["note_not_found"])
 
@@ -85,14 +86,14 @@ class NotesExtension(ModuleExtension):
         reply_message = message.reply_to_message
 
         if reply_message.text:
-            note_content = reply_message.text
+            note_content = reply_message.text.markdown
             note_type = "text"
         elif reply_message.media:
             try:
                 media = reply_message.photo or reply_message.video or reply_message.document or reply_message.audio or reply_message.voice or reply_message.animation \
                 or reply_message.sticker
             
-                note_content = f"{media.file_id}\n{reply_message.caption or ''}"
+                note_content = f"{media.file_id}\n{reply_message.caption.markdown or ''}"
                 note_type = "media"
             except AttributeError:
                 await message.reply(self.S["notes"]["note_save_error"])
