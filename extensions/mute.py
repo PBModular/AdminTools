@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from ..checks import ban_check_message
+from ..checks import restrict_check_message
 from ..utils import parse_timedelta, parse_user, UserParseStatus
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
@@ -11,7 +11,7 @@ from babel.dates import format_timedelta
 class MuteExtension(ModuleExtension):
     @command("mute", filters.group)
     async def mute_cmd(self, bot: Client, message: Message):
-        if await ban_check_message(self, message) is None:
+        if await restrict_check_message(self, message) is None:
             return
 
         status, user = await parse_user(bot, message)
@@ -46,7 +46,7 @@ class MuteExtension(ModuleExtension):
 
     @command("unmute", filters.group)
     async def unmute_cmd(self, bot: Client, message: Message):
-        user = await ban_check_message(self, message)
+        user = await restrict_check_message(self, message)
         if user is None:
             return
 

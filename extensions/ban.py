@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from ..checks import ban_check_message
+from ..checks import restrict_check_message
 from ..utils import parse_timedelta, parse_user, UserParseStatus
 from pyrogram import Client, filters
 from pyrogram.types import Message
@@ -12,7 +12,7 @@ from babel.dates import format_timedelta
 class BanExtension(ModuleExtension):
     @command("ban", filters.group)
     async def ban_cmd(self, bot: Client, message: Message):
-        if await ban_check_message(self, message) is None:
+        if await restrict_check_message(self, message) is None:
             return
 
         status, user = await parse_user(bot, message)
@@ -50,7 +50,7 @@ class BanExtension(ModuleExtension):
             await message.reply(self.S["not_supergroup"])
             return
 
-        user = await ban_check_message(self, message)
+        user = await restrict_check_message(self, message)
         if user is None:
             return
 
@@ -65,7 +65,7 @@ class BanExtension(ModuleExtension):
             await message.reply(self.S["not_supergroup"])
             return
 
-        user = await ban_check_message(self, message)
+        user = await restrict_check_message(self, message)
         if user is None:
             return
 
