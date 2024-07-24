@@ -1,7 +1,9 @@
 from base.mod_ext import ModuleExtension
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio, InputMediaAnimation
 from pyrogram.enums import ParseMode
+from pyrogram.handlers import MessageHandler
+from pyrogram.handlers.handler import Handler
 from base.module import command, allowed_for
 from ..db import Notes
 from sqlalchemy import select, exc
@@ -10,6 +12,12 @@ from sqlalchemy import select, exc
 class NotesExtension(ModuleExtension):
     def on_init(self):
         self.notes = {}
+
+    @property
+    def custom_handlers(self) -> list[Handler]:
+        return [
+            MessageHandler(self.handle_hashtag_note, filters.regex(r'^#\w+$'))
+        ]
 
     async def get_chat_notes(self, chat_id):
         async with self.db.session_maker() as session:
@@ -58,6 +66,14 @@ class NotesExtension(ModuleExtension):
             return
         
         await self.send_note(bot, message.chat.id, note)
+
+    async def handle_hashtag_note(self, bot: Client, message: Message):
+        note_name = message.text[1:]
+        notes = await self.get_chat_notes(message.chat.id)
+        note = next((note for note in notes if note.name == note_name), None)
+
+        if note:
+            await self.send_note(bot, message.chat.id, note)
 
     async def send_note(self, bot: Client, chat_id, note):
         if note.type == "text":
