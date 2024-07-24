@@ -28,7 +28,7 @@ async def base_checks(self, message: Message, member: ChatMember) -> Optional[Us
     return user
 
 
-async def ban_check_message(self, message: Message) -> Optional[User]:
+async def restrict_check_message(self, message: Message) -> Optional[User]:
     member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
     user = await base_checks(self, message, member)
     if user is None:
