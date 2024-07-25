@@ -7,10 +7,6 @@ from typing import Optional
 
 
 async def base_checks(self, message: Message, member: ChatMember) -> Optional[User]:
-    if not (member.status == ChatMemberStatus.ADMINISTRATOR or member.status == ChatMemberStatus.OWNER):
-        await message.reply(self.S["not_admin"])
-        return
-
     status, user = await parse_user(self.bot, message)
     if status == UserParseStatus.INVALID_MENTION:
         await message.reply(self.S["user_not_found"], quote=True)
@@ -34,31 +30,28 @@ async def restrict_check_message(self, message: Message) -> Optional[User]:
     if user is None:
         return
 
-    if not member.privileges.can_restrict_members and member.status == ChatMemberStatus.ADMINISTRATOR:
-        await message.reply(
-            self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>",
-            quote=True
-        )
+    if not (member.status in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER}):
+        await message.reply(self.S["not_admin"])
+        return
+
+    if not member.privileges.can_restrict_members:
+        await message.reply(self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>")
         return
 
     me = await self.bot.get_me()
     me_member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=me.id)
-    if not me_member.status == ChatMemberStatus.ADMINISTRATOR or not me_member.privileges.can_restrict_members:
-        await message.reply(
-            self.S["bot_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>"
-        )
+    
+    if (me_member.status not in {ChatMemberStatus.ADMINISTRATOR} or not me_member.privileges.can_restrict_members):
+        await message.reply(self.S["bot_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>")
         return
 
     try:
-        affect_member = await self.bot.get_chat_member(
-            chat_id=message.chat.id, user_id=user.id
-        )
+        affect_member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=user.id)
     except UserNotParticipant:
         await message.reply(self.S["user_not_found"])
         return
 
-    if (affect_member.status == ChatMemberStatus.ADMINISTRATOR or affect_member.status == ChatMemberStatus.OWNER)\
-            and not member.status == ChatMemberStatus.OWNER:
+    if (affect_member.status in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER} and member.status != ChatMemberStatus.OWNER):
         await message.reply(self.S["tried_to_affect_admin"])
         return
 
