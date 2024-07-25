@@ -10,7 +10,7 @@ from sqlalchemy import select
 
 from base.mod_ext import ModuleExtension
 from base.module import command, callback_query
-from ..checks import base_checks
+from ..checks import restrict_check_message
 from ..db import ChatSettings, Warns
 from ..utils import parse_time, parse_user, UserParseStatus
 
@@ -21,35 +21,9 @@ ALLOWED_MODES = ("kick", "ban", "mute")
 
 class WarnsExtension(ModuleExtension):
 
-    async def check_msg(self, message: Message) -> Optional[User]:
-        member = await self.bot.get_chat_member(message.chat.id, message.from_user.id)
-        user = await base_checks(self, message, member)
-        
-        if not user:
-            return None
-
-        me = await self.bot.get_me()
-        me_member = await self.bot.get_chat_member(message.chat.id, me.id)
-        
-        if me_member.status != ChatMemberStatus.ADMINISTRATOR or not me_member.privileges.can_restrict_members:
-            await message.reply(f"{self.S['bot_insufficient_rights']} - <code>{self.S['rights']['restrict_members']}</code>")
-            return None
-
-        try:
-            affect_member = await self.bot.get_chat_member(message.chat.id, user.id)
-        except UserNotParticipant:
-            await message.reply(self.S["user_not_found"])
-            return None
-
-        if (affect_member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]) and member.status != ChatMemberStatus.OWNER:
-            await message.reply(self.S["tried_to_affect_admin"])
-            return None
-
-        return user
-
     @command("warn", filters.group)
     async def warn_cmd(self, bot: Client, message: Message):
-        user = await self.check_msg(message)
+        user = await restrict_check_message(self, message)
         if not user:
             return
 
@@ -152,7 +126,7 @@ class WarnsExtension(ModuleExtension):
 
     @command("resetwarns", filters.group)
     async def reset_warns_cmd(self, bot: Client, message: Message):
-        user = await self.check_msg(message)
+        user = await restrict_check_message(self, message)
         if not user:
             return
 
@@ -171,7 +145,7 @@ class WarnsExtension(ModuleExtension):
 
     @command("rmwarn", filters.group)
     async def rmwarn_cmd(self, bot: Client, message: Message):
-        user = await self.check_msg(message)
+        user = await restrict_check_message(self, message)
         if not user:
             return
 
