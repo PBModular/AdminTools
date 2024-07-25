@@ -134,7 +134,9 @@ class WarnsExtension(ModuleExtension):
             return
 
         user = user if status != UserParseStatus.NO_REPLY else message.from_user
-        if user.id in [bot.get_me().id, message.from_user.id]:
+        me = await self.bot.get_me()
+        
+        if user.id == me.id:
             await message.reply(self.S["nice_try"])
             return
 
