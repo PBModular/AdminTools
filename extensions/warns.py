@@ -27,6 +27,20 @@ class WarnsExtension(ModuleExtension):
         if not user:
             return
 
+        if message.reply_to_message:
+            args = message.text.split(maxsplit=1)
+            if len(args) > 1:
+                reason_words = args[1].split()
+                reason = ' '.join(reason_words[:10])
+            else:
+                reason = self.S["warn"]["no_reason"]
+        else:
+            args = message.text.split(maxsplit=2)
+            if len(args) > 2:
+                reason = args[2]
+            else:
+                reason = self.S["warn"]["no_reason"]
+
         async with self.db.session_maker() as session:
             db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if not db_settings:
@@ -40,12 +54,16 @@ class WarnsExtension(ModuleExtension):
             name = f"@{user.username}" if user.username else user.first_name
             db_user.count += 1
 
+            current_date = datetime.utcnow().strftime("%Y.%m.%d %H:%M:%S")
+            db_user.reasons = f"{db_user.reasons},{reason}" if db_user.reasons else reason
+            db_user.dates = f"{db_user.dates},{current_date}" if db_user.dates else current_date
+
             if db_user.count >= db_settings.warn_limit:
                 await self.apply_restriction(bot, message, user, db_settings, db_user.count, name)
                 await session.delete(db_user)
             else:
                 keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text=self.S["warn"]["button"], callback_data=f"remove_warn:{user.id}")]])
-                await message.reply(self.S["warn"]["msg"].format(user=name, cur=db_user.count, total=db_settings.warn_limit), reply_markup=keyboard)
+                await message.reply(self.S["warn"]["msg"].format(user=name, cur=db_user.count, total=db_settings.warn_limit, reason=reason), reply_markup=keyboard)
 
             await session.commit()
 
@@ -93,7 +111,14 @@ class WarnsExtension(ModuleExtension):
                 await call.answer(self.S["warn"]["no_warns_call"].format(user=user_name))
                 return
 
+            reasons = db_user.reasons.split(",")
+            dates = db_user.dates.split(",")
+            reasons.pop()
+            dates.pop()
+
             db_user.count -= 1
+            db_user.reasons = ",".join(reasons)
+            db_user.dates = ",".join(dates)
             await session.commit()
 
         await call.answer()
@@ -122,7 +147,11 @@ class WarnsExtension(ModuleExtension):
             if not db_user or db_user.count == 0:
                 await message.reply(self.S["warn"]["no_warns_call"].format(user=name))
             elif warn_limit:
-                await message.reply(self.S["warn"]["status"].format(user=name, cur=db_user.count, total=warn_limit))
+                reasons = db_user.reasons.split(",")
+                dates = db_user.dates.split(",")
+                
+                warn_list = "\n".join([f"{i+1}. <code>{dates[i]}</code>, {self.S["warn"]["reason"]} {reasons[i]}" for i in range(len(reasons))])
+                await message.reply(self.S["warn"]["status"].format(user=name, cur=db_user.count, total=warn_limit, warn_list=warn_list))
 
     @command("resetwarns", filters.group)
     async def reset_warns_cmd(self, bot: Client, message: Message):
@@ -139,6 +168,8 @@ class WarnsExtension(ModuleExtension):
                 return
 
             db_user.count = 0
+            db_user.reasons = ""
+            db_user.dates = ""
             await session.commit()
 
         await message.reply(self.S["warn"]["reset"].format(user=name))
@@ -161,7 +192,14 @@ class WarnsExtension(ModuleExtension):
                 await message.reply(self.S["warn"]["no_warns"].format(user=name))
                 return
 
+            reasons = db_user.reasons.split(",")
+            dates = db_user.dates.split(",")
+            reasons.pop()
+            dates.pop()
+
             db_user.count -= 1
+            db_user.reasons = ",".join(reasons)
+            db_user.dates = ",".join(dates)
             await session.commit()
 
             await message.reply(self.S["warn"]["remove_msg"].format(user=name, cur=db_user.count, total=warn_limit))
