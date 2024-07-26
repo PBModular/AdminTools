@@ -66,14 +66,24 @@ demote:
   err: "<b>I can't grab admin from this user!</b>"
 
 warn:
-  msg: "<b>{user} has got a warning!</b> ({cur}/{total})"
+  msg: |
+    <b>{user} has got a warning!</b> 
+    <b>Current warnings:</b> {cur}/{total}
+    <b>Reason:</b> {reason}
   remove_call: "Administrator {admin} removed {user} warning!"
   remove_msg: "<b>Okay!</b> Removed one {user} warning ({cur}/{total})"
   button: "Remove warning \U0001F510"
   no_warns: "<b>{user} doesn't have any warnings!</b>"
   no_warns_call: "{user} doesn't have any warnings!"
   reset: "<b>All warnings for {user} were reset!</b>"
-  status: "{user} has <b>{cur} of {total}</b> warnings"
+  status: |
+    {user} has {cur}/{total} warnings.
+
+    <b>Warnings:</b>
+    {warn_list}
+  reason: |
+    <b>Reason:</b> 
+  no_reason: No reason provided
   restrict_header: "<b>This user has crossed the border…</b>"
   restrictions:
     ban: banned!

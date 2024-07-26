@@ -33,6 +33,9 @@ class Warns(Base):
     chat_id: Mapped[int]
     user_id: Mapped[int]
     count: Mapped[int] = mapped_column(default=0)
+    reasons: Mapped[str]
+    dates: Mapped[str]
 
     def __repr__(self):
-        return f"Warns(id={self.id}, chat_id={self.chat_id}, user_id={self.user_id}, count={self.count})"
+        return f"Warns(id={self.id}, chat_id={self.chat_id}, user_id={self.user_id}, count={self.count}, reason={self.reasons}, \
+            dates={self.dates})"
