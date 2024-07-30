@@ -174,3 +174,4 @@ notes:
   media_not_supported: Failed to save the note! The message does not contain text or supported media.
   note_added: Note <code>{note_name}</code> was added.
   note_removed: Note <code>{note_name}</code> was deleted.
+  no_spaces: Note name shouldn't have spaces in it!

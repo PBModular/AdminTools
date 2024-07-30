@@ -130,6 +130,10 @@ class NotesExtension(ModuleExtension):
             await message.reply(self.S["notes"]["specify_note_name"])
             return
 
+        if " " in note_name:
+            await message.reply(self.S["notes"]["no_spaces"])
+            return
+
         reply_message = message.reply_to_message
 
         if reply_message.text:

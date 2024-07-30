@@ -115,3 +115,4 @@ notes:
   media_not_supported: Не вдалося зберегти нотатку! Повідомлення не містить тексту або підтримуваного медіа.
   note_added: Нотатку <code>{note_name}</code> додано.
   note_removed: Нотатку <code>{note_name}</code> видалено.
+  no_spaces: У назві нотатки не повинно бути пробілів!

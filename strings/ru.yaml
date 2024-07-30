@@ -174,3 +174,4 @@ notes:
   media_not_supported: Не удалось сохранить заметку! Сообщение не содержит текста или поддерживаемого медиа.
   note_added: Заметка <code>{note_name}</code> добавлена.
   note_removed: Заметка <code>{note_name}</code> удалена.
+  no_spaces: В названии заметки не должно быть пробелов!
