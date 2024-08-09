@@ -54,7 +54,7 @@ class WarnsExtension(ModuleExtension):
             name = f"@{user.username}" if user.username else user.first_name
             db_user.count += 1
 
-            current_date = datetime.utcnow().strftime("%Y.%m.%d %H:%M:%S")
+            current_date = datetime.now().strftime("%Y.%m.%d %H:%M")
             db_user.reasons = f"{db_user.reasons},{reason}" if db_user.reasons else reason
             db_user.dates = f"{db_user.dates},{current_date}" if db_user.dates else current_date
 
