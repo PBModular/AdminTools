@@ -16,7 +16,7 @@ class NotesExtension(ModuleExtension):
     @property
     def custom_handlers(self) -> list[Handler]:
         return [
-            MessageHandler(self.handle_hashtag_note, filters.regex(r'^#\w+$'))
+            MessageHandler(self.handle_hashtag_note, filters.regex(r'^#[\w-]+$'))
         ]
 
     async def get_chat_notes(self, chat_id):
