@@ -49,6 +49,9 @@ class NotesExtension(ModuleExtension):
             if note_to_delete:
                 await session.delete(note_to_delete)
                 await session.commit()
+                return True
+            else:
+                return False
 
     @command("note")
     async def note_cmd(self, bot: Client, message: Message):
@@ -182,5 +185,8 @@ class NotesExtension(ModuleExtension):
             await message.reply(self.S["notes"]["specify_note_name"])
             return
         
-        await self.remove_chat_notes(message.chat.id, note_name)
-        await message.reply(self.S["notes"]["note_removed"].format(note_name=note_name))
+        note_removed = await self.remove_chat_notes(message.chat.id, note_name)
+        if note_removed:
+            await message.reply(self.S["notes"]["note_removed"].format(note_name=note_name))
+        else:
+            await message.reply(self.S["notes"]["note_not_found"])
