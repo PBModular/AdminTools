@@ -71,6 +71,9 @@ class NotesExtension(ModuleExtension):
         await self.send_note(bot, message.chat.id, note)
 
     async def handle_hashtag_note(self, bot: Client, message: Message):
+        if not message.text:
+            return
+
         note_name = message.text[1:]
         notes = await self.get_chat_notes(message.chat.id)
         note = next((note for note in notes if note.name == note_name), None)
