@@ -119,6 +119,16 @@ warn:
     ok: |
       <b>Warnings limit changed!</b>
       Current value: {total}
+    
+  autoreset:
+    usage: "<b>Usage:</b> /setautoreset [on/off] [time]\nExample: /setautoreset on 7d (to reset warns after 7 days)"
+    min_time: "Minimum autoreset time is 1 hour. Please specify a longer time period."
+    enabled_with_time: "Warns autoreset has been enabled. Warns will be automatically reset after {time}."
+    disabled: "Warns autoreset has been disabled."
+    status_enabled: "Warns autoreset is currently enabled."
+    status_enabled_with_time: "Warns autoreset is currently enabled. User warns will be reset after {time}."
+    status_disabled: "Warns autoreset is currently disabled."
+    not_configured: "Warns autoreset is not configured for this chat."
 
 greeting:
   default: |

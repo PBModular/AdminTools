@@ -50,11 +50,22 @@ class WarnsExtension(ModuleExtension):
             if not db_user:
                 db_user = Warns(chat_id=message.chat.id, user_id=user.id, count=0)
                 session.add(db_user)
+            else:
+                # Check for autoreset if enabled
+                if db_settings.warn_autoreset and db_settings.warn_autoreset_time > 0 and db_user.last_warn_time:
+                    last_warn = datetime.fromisoformat(db_user.last_warn_time)
+                    reset_threshold = last_warn + timedelta(seconds=db_settings.warn_autoreset_time)
+                    if datetime.now() > reset_threshold:
+                        # Reset warns as the time has passed
+                        db_user.count = 0
+                        db_user.reasons = ""
+                        db_user.dates = ""
 
             name = f"@{user.username}" if user.username else user.first_name
             db_user.count += 1
 
             current_date = datetime.now().strftime("%Y.%m.%d %H:%M")
+            db_user.last_warn_time = datetime.now().isoformat()
             db_user.reasons = f"{db_user.reasons},{reason}" if db_user.reasons else reason
             db_user.dates = f"{db_user.dates},{current_date}" if db_user.dates else current_date
 
@@ -204,6 +215,26 @@ class WarnsExtension(ModuleExtension):
 
             await message.reply(self.S["warn"]["remove_msg"].format(user=name, cur=db_user.count, total=warn_limit))
 
+    @command("autoreset", filters.group)
+    async def check_autoreset_cmd(self, bot: Client, message: Message):
+        async with self.db.session_maker() as session:
+            db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
+            if not db_settings:
+                return
+            
+            if not hasattr(db_settings, 'warn_autoreset'):
+                await message.reply(self.S["warn"]["autoreset"]["not_configured"])
+                return
+                
+            if not db_settings.warn_autoreset:
+                await message.reply(self.S["warn"]["autoreset"]["status_disabled"])
+            else:
+                if db_settings.warn_autoreset_time > 0:
+                    time_text = format_timedelta(timedelta(seconds=db_settings.warn_autoreset_time), locale=self.cur_lang, format='long')
+                    await message.reply(self.S["warn"]["autoreset"]["status_enabled_with_time"].format(time=time_text))
+                else:
+                    await message.reply(self.S["warn"]["autoreset"]["status_enabled"])
+
     @command("setwarnmode", filters.group)
     async def set_warn_mode_cmd(self, bot: Client, message: Message):
         member = await bot.get_chat_member(message.chat.id, message.from_user.id)
@@ -266,3 +297,47 @@ class WarnsExtension(ModuleExtension):
             await session.commit()
 
         await message.reply(self.S["warn"]["set_limit"]["ok"].format(total=limit))
+
+    @command("setautoreset", filters.group)
+    async def set_autoreset_cmd(self, bot: Client, message: Message):
+        member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+        if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            await message.reply(self.S["not_admin"])
+            return
+
+        args = message.text.split()[1:]
+        if not args:
+            await message.reply(self.S["warn"]["autoreset"]["usage"])
+            return
+
+        mode = args[0].lower()
+        if mode not in ["on", "off"]:
+            await message.reply(self.S["warn"]["autoreset"]["usage"])
+            return
+        
+        enabled = mode == "on"
+        autoreset_time = 0
+        
+        if enabled and len(args) > 1:
+            time_value = parse_time(args[1])
+            if time_value is None or time_value < 3600:  # minimum 1 hour
+                await message.reply(self.S["warn"]["autoreset"]["min_time"])
+                return
+            autoreset_time = time_value
+        
+        async with self.db.session_maker() as session:
+            db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
+            if not db_settings:
+                return
+
+            db_settings.warn_autoreset = enabled
+            if enabled:
+                db_settings.warn_autoreset_time = autoreset_time
+            await session.commit()
+        
+        if enabled:
+            if autoreset_time > 0:
+                time_text = format_timedelta(timedelta(seconds=autoreset_time), locale=self.cur_lang, format='long')
+                await message.reply(self.S["warn"]["autoreset"]["enabled_with_time"].format(time=time_text))
+        else:
+            await message.reply(self.S["warn"]["autoreset"]["disabled"])
