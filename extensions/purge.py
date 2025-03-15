@@ -14,6 +14,10 @@ class PurgeExtension(ModuleExtension):
             await message.reply(self.S["not_admin"])
             return
 
+        if not member.privileges.can_delete_messages:
+            await message.reply(self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['delete_messages']}</code>")
+            return
+
         me = await bot.get_me()
         me_member = await bot.get_chat_member(chat_id=message.chat.id, user_id=me.id)
 
