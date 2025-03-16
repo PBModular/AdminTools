@@ -215,7 +215,7 @@ class WarnsExtension(ModuleExtension):
 
             await message.reply(self.S["warn"]["remove_msg"].format(user=name, cur=db_user.count, total=warn_limit))
 
-    @command("autoreset", filters.group)
+    @command("warnautoreset", filters.group)
     async def check_autoreset_cmd(self, bot: Client, message: Message):
         async with self.db.session_maker() as session:
             db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
@@ -298,7 +298,7 @@ class WarnsExtension(ModuleExtension):
 
         await message.reply(self.S["warn"]["set_limit"]["ok"].format(total=limit))
 
-    @command("setautoreset", filters.group)
+    @command("setwarnautoreset", filters.group)
     async def set_autoreset_cmd(self, bot: Client, message: Message):
         member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
