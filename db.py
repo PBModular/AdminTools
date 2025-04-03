@@ -18,6 +18,11 @@ class ChatSettings(Base):
     greeting_enabled: Mapped[bool] = mapped_column(default=False)
     greeting_text: Mapped[Optional[str]]
     greeting_file_id: Mapped[Optional[str]]
+    antiflood_enabled: Mapped[bool] = mapped_column(default=False)
+    antiflood_message_limit: Mapped[int] = mapped_column(default=10)
+    antiflood_time_frame: Mapped[int] = mapped_column(default=5)
+    antiflood_action: Mapped[str] = mapped_column(default="mute")
+    antiflood_action_duration: Mapped[int] = mapped_column(default=600)
 
 class Notes(Base):
     __tablename__ = "notes"
