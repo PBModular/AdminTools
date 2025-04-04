@@ -2,6 +2,7 @@ from base.mod_ext import ModuleExtension
 from base.module import command
 from ..checks import restrict_check_message
 from ..db import ChatSettings
+from ..extensions.warns import WarnsExtension
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from pyrogram.handlers import MessageHandler
@@ -51,9 +52,17 @@ class AntiFloodExtension(ModuleExtension):
         """Execute the configured action against the flooding user."""
         user = message.from_user
         action = settings.antiflood_action
+        name = f"@{user.username}" if user.username else user.first_name
 
         if action == "warn":
-            await message.reply(f"{user.first_name}, please do not flood the chat.")
+            status = await WarnsExtension._warn_user(bot, message.chat.id, user.id, "Flooding")
+            if status.get("error"):
+                await message.reply("Error: Could not apply warning due to missing settings.")
+                return
+            if status["limit_reached"]:
+                await message.reply(f"{name} has been {status['restriction']} for flooding.")
+            else:
+                await message.reply(f"{name} has been warned for flooding. ({status['warn_count']}/{status['warn_limit']})")
         elif action == "mute":
             duration = settings.antiflood_action_duration
             until_date = (datetime.now() + timedelta(seconds=duration)) if duration > 0 else datetime.fromtimestamp(0)
@@ -63,7 +72,7 @@ class AntiFloodExtension(ModuleExtension):
                 permissions=ChatPermissions(can_send_messages=False),
                 until_date=until_date
             )
-            await message.reply(f"{user.first_name} has been muted for flooding.")
+            await message.reply(f"{name} has been muted for flooding.")
         elif action == "ban":
             duration = settings.antiflood_action_duration
             until_date = (datetime.now() + timedelta(seconds=duration)) if duration > 0 else datetime.fromtimestamp(0)
@@ -72,7 +81,7 @@ class AntiFloodExtension(ModuleExtension):
                 user_id=user.id,
                 until_date=until_date
             )
-            await message.reply(f"{user.first_name} has been banned for flooding.")
+            await message.reply(f"{name} has been banned for flooding.")
 
     @command("antiflood", filters.group)
     async def antiflood_cmd(self, bot: Client, message: Message):
