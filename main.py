@@ -19,8 +19,6 @@ from .extensions.antiflood import AntiFloodExtension
 from sqlalchemy import select
 from .db import Base, ChatSettings
 
-from .config import DefaultWarnSettings
-
 
 class AdminModule(BaseModule):
     @property
@@ -43,6 +41,11 @@ class AdminModule(BaseModule):
 
     async def start_cmd(self, _, message: Message):
         """Initialize database entry for chat"""
+        warn_defaults = self.module_config.get("warn_defaults", {})
+        default_limit = warn_defaults.get("limit", 5)
+        default_restriction = warn_defaults.get("restriction", "kick")
+        default_time = warn_defaults.get("time", 0)
+
         async with self.db.session_maker() as session:
             db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if db_settings is not None:
@@ -51,9 +54,9 @@ class AdminModule(BaseModule):
 
             db_settings = ChatSettings(
                 chat_id=message.chat.id,
-                warn_limit=DefaultWarnSettings.limit,
-                warn_restriction=DefaultWarnSettings.restriction,
-                warn_rest_time=DefaultWarnSettings.time,
+                warn_limit=default_limit,
+                warn_restriction=default_restriction,
+                warn_rest_time=default_time,
                 greeting_text="{default}"
             )
             session.add(db_settings)
