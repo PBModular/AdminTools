@@ -135,3 +135,27 @@ notes:
   note_added: Нотатку <code>{note_name}</code> додано.
   note_removed: Нотатку <code>{note_name}</code> видалено.
   no_spaces: У назві нотатки не повинно бути пробілів!
+
+antiflood:
+  warn_error: "Помилка: Не вдалося застосувати попередження через відсутність налаштувань."
+  user_restricted: "{name} був(-ла) {restriction} за флуд."
+  user_warned: "{name} отримав(-ла) попередження за флуд. ({warn_count}/{warn_limit})"
+  user_muted: "{name} був(-ла) змучений(-а) за флуд."
+  user_banned: "{name} був(-ла) забанений(-а) за флуд."
+  invalid_subcommand: "Невірна підкоманда. Використовуйте /antiflood [status|enable|disable|set]"
+  settings_not_found: "Налаштування чату не знайдено. Спочатку виконайте /start AdminTools."
+  status:
+    info: |
+      Антифлуд {status}.
+      Ліміт: {limit} повідомлень за {time_frame} секунд.
+      Дія: {action_details}
+    enabled: увімкнено
+    disabled: вимкнено
+    action_duration: "{action} на {duration} секунд"
+    action_permanent: "{action} назавжди"
+  enabled: "Антифлуд увімкнено."
+  disabled: "Антифлуд вимкнено."
+  set_usage: "Використання: /antiflood set <повідомлення> <секунди> <дія> [тривалість]"
+  invalid_action: "Невірна дія. Має бути 'warn', 'mute' або 'ban'."
+  invalid_params: "Невірні параметри. Повідомлення, секунди та тривалість повинні бути цілими числами."
+  settings_updated: "Налаштування антифлуду оновлено."

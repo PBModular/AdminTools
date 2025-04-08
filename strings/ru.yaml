@@ -195,3 +195,27 @@ notes:
   note_added: Заметка <code>{note_name}</code> добавлена.
   note_removed: Заметка <code>{note_name}</code> удалена.
   no_spaces: В названии заметки не должно быть пробелов!
+
+antiflood:
+  warn_error: "Ошибка: Не удалось применить предупреждение из-за отсутствия настроек."
+  user_restricted: "{name} был(-а) {restriction} за флуд."
+  user_warned: "{name} получил(-а) предупреждение за флуд. ({warn_count}/{warn_limit})"
+  user_muted: "{name} был(-а) заглушен(-а) за флуд."
+  user_banned: "{name} был(-а) забанен(-а) за флуд."
+  invalid_subcommand: "Неверная подкоманда. Используйте /antiflood [status|enable|disable|set]"
+  settings_not_found: "Настройки чата не найдены. Сначала выполните /start AdminTools."
+  status:
+    info: |
+      Антифлуд {status}.
+      Лимит: {limit} сообщений за {time_frame} секунд.
+      Действие: {action_details}
+    enabled: включен
+    disabled: выключен
+    action_duration: "{action} на {duration} секунд"
+    action_permanent: "{action} навсегда"
+  enabled: "Антифлуд включен."
+  disabled: "Антифлуд выключен."
+  set_usage: "Использование: /antiflood set <сообщения> <секунды> <действие> [длительность]"
+  invalid_action: "Неверное действие. Должно быть 'warn', 'mute' или 'ban'."
+  invalid_params: "Неверные параметры. Сообщения, секунды и длительность должны быть целыми числами."
+  settings_updated: "Настройки антифлуда обновлены."

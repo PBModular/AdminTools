@@ -195,3 +195,27 @@ notes:
   note_added: Note <code>{note_name}</code> was added.
   note_removed: Note <code>{note_name}</code> was deleted.
   no_spaces: Note name shouldn't have spaces in it!
+
+antiflood:
+  warn_error: "Error: Could not apply warning due to missing settings."
+  user_restricted: "{name} has been {restriction} for flooding."
+  user_warned: "{name} has been warned for flooding. ({warn_count}/{warn_limit})"
+  user_muted: "{name} has been muted for flooding."
+  user_banned: "{name} has been banned for flooding."
+  invalid_subcommand: "Invalid subcommand. Use /antiflood [status|enable|disable|set]"
+  settings_not_found: "Chat settings not found. Run /start AdminTools first."
+  status:
+    info: |
+      AntiFlood is {status}.
+      Limit: {limit} messages in {time_frame} seconds.
+      Action: {action_details}
+    enabled: enabled
+    disabled: disabled
+    action_duration: "{action} for {duration} seconds"
+    action_permanent: "{action} permanently"
+  enabled: "AntiFlood has been enabled."
+  disabled: "AntiFlood has been disabled."
+  set_usage: "Usage: /antiflood set <messages> <seconds> <action> [duration]"
+  invalid_action: "Invalid action. Must be 'warn', 'mute', or 'ban'."
+  invalid_params: "Invalid parameters. Messages, seconds, and duration must be integers."
+  settings_updated: "AntiFlood settings updated."

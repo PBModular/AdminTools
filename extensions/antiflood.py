@@ -1,5 +1,5 @@
 from base.mod_ext import ModuleExtension
-from base.module import command
+from base.module import command, allowed_for
 from ..checks import restrict_check_message
 from ..db import ChatSettings
 from ..extensions.warns import WarnsExtension
@@ -57,12 +57,12 @@ class AntiFloodExtension(ModuleExtension):
         if action == "warn":
             status = await WarnsExtension._warn_user(bot, message.chat.id, user.id, "Flooding")
             if status.get("error"):
-                await message.reply("Error: Could not apply warning due to missing settings.")
+                await message.reply(self.S["antiflood"]["warn_error"])
                 return
             if status["limit_reached"]:
-                await message.reply(f"{name} has been {status['restriction']} for flooding.")
+                await message.reply(self.S["antiflood"]["user_restricted"].format(name=name, restriction=status['restriction']))
             else:
-                await message.reply(f"{name} has been warned for flooding. ({status['warn_count']}/{status['warn_limit']})")
+                await message.reply(self.S["antiflood"]["user_warned"].format(name=name, warn_count=status['warn_count'], warn_limit=status['warn_limit']))
         elif action == "mute":
             duration = settings.antiflood_action_duration
             until_date = (datetime.now() + timedelta(seconds=duration)) if duration > 0 else datetime.fromtimestamp(0)
@@ -72,7 +72,7 @@ class AntiFloodExtension(ModuleExtension):
                 permissions=ChatPermissions(can_send_messages=False),
                 until_date=until_date
             )
-            await message.reply(f"{name} has been muted for flooding.")
+            await message.reply(self.S["antiflood"]["user_muted"].format(name=name))
         elif action == "ban":
             duration = settings.antiflood_action_duration
             until_date = (datetime.now() + timedelta(seconds=duration)) if duration > 0 else datetime.fromtimestamp(0)
@@ -81,8 +81,9 @@ class AntiFloodExtension(ModuleExtension):
                 user_id=user.id,
                 until_date=until_date
             )
-            await message.reply(f"{name} has been banned for flooding.")
+            await message.reply(self.S["antiflood"]["user_banned"].format(name=name))
 
+    @allowed_for(["chat_owner", "admins"])
     @command("antiflood", filters.group)
     async def antiflood_cmd(self, bot: Client, message: Message):
         """Handle AntiFlood configuration commands."""
@@ -96,78 +97,80 @@ class AntiFloodExtension(ModuleExtension):
         elif args[1] == "set":
             await self.set_antiflood(message)
         else:
-            await message.reply("Invalid subcommand. Use /antiflood [status|enable|disable|set]")
+            await message.reply(self.S["antiflood"]["invalid_subcommand"])
 
     async def show_antiflood_status(self, message: Message):
         """Display current AntiFlood settings."""
         async with self.db.session_maker() as session:
             settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if settings is None:
-                await message.reply("Chat settings not found. Run /start AdminTools first.")
+                await message.reply(self.S["antiflood"]["settings_not_found"])
                 return
-            status = "enabled" if settings.antiflood_enabled else "disabled"
+            status_text = self.S["antiflood"]["status"]["enabled"] if settings.antiflood_enabled else self.S["antiflood"]["status"]["disabled"]
             action = settings.antiflood_action
+            action_details = action
             if action in ["mute", "ban"]:
                 duration = settings.antiflood_action_duration
-                action += f" for {duration} seconds" if duration > 0 else " permanently"
-            text = f"AntiFlood is {status}.\n"
-            text += f"Limit: {settings.antiflood_message_limit} messages in {settings.antiflood_time_frame} seconds.\n"
-            text += f"Action: {action}"
+                if duration > 0:
+                    action_details = self.S["antiflood"]["status"]["action_duration"].format(action=action, duration=duration)
+                else:
+                    action_details = self.S["antiflood"]["status"]["action_permanent"].format(action=action)
+
+            text = self.S["antiflood"]["status"]["info"].format(
+                status=status_text,
+                limit=settings.antiflood_message_limit,
+                time_frame=settings.antiflood_time_frame,
+                action_details=action_details
+            )
             await message.reply(text)
 
     async def enable_antiflood(self, message: Message):
         """Enable AntiFlood for the chat."""
-        if await restrict_check_message(self, message) is None:
-            return
         async with self.db.session_maker() as session:
             settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if settings is None:
-                await message.reply("Chat settings not found. Run /start AdminTools first.")
+                await message.reply(self.S["antiflood"]["settings_not_found"])
                 return
             settings.antiflood_enabled = True
             await session.commit()
             self.settings_cache[message.chat.id] = settings
-        await message.reply("AntiFlood has been enabled.")
+        await message.reply(self.S["antiflood"]["enabled"])
 
     async def disable_antiflood(self, message: Message):
         """Disable AntiFlood for the chat."""
-        if await restrict_check_message(self, message) is None:
-            return
         async with self.db.session_maker() as session:
             settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if settings is None:
-                await message.reply("Chat settings not found. Run /start AdminTools first.")
+                await message.reply(self.S["antiflood"]["settings_not_found"])
                 return
             settings.antiflood_enabled = False
             await session.commit()
             self.settings_cache[message.chat.id] = settings
-        await message.reply("AntiFlood has been disabled.")
+        await message.reply(self.S["antiflood"]["disabled"])
 
     async def set_antiflood(self, message: Message):
         """Set AntiFlood parameters."""
-        if await restrict_check_message(self, message) is None:
-            return
         args = message.text.split()
         if len(args) < 5:
-            await message.reply("Usage: /antiflood set <messages> <seconds> <action> [duration]")
+            await message.reply(self.S["antiflood"]["set_usage"])
             return
         try:
             message_limit = int(args[2])
             time_frame = int(args[3])
             action = args[4].lower()
             if action not in ["warn", "mute", "ban"]:
-                await message.reply("Invalid action. Must be 'warn', 'mute', or 'ban'.")
+                await message.reply(self.S["antiflood"]["invalid_action"])
                 return
             duration = 0
             if action in ["mute", "ban"] and len(args) > 5:
                 duration = int(args[5])
         except ValueError:
-            await message.reply("Invalid parameters. Messages, seconds, and duration must be integers.")
+            await message.reply(self.S["antiflood"]["invalid_params"])
             return
         async with self.db.session_maker() as session:
             settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if settings is None:
-                await message.reply("Chat settings not found. Run /start AdminTools first.")
+                await message.reply(self.S["antiflood"]["settings_not_found"])
                 return
             settings.antiflood_message_limit = message_limit
             settings.antiflood_time_frame = time_frame
@@ -175,4 +178,4 @@ class AntiFloodExtension(ModuleExtension):
             settings.antiflood_action_duration = duration
             await session.commit()
             self.settings_cache[message.chat.id] = settings
-        await message.reply("AntiFlood settings updated.")
+        await message.reply(self.S["antiflood"]["settings_updated"])
