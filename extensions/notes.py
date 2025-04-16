@@ -53,7 +53,7 @@ class NotesExtension(ModuleExtension):
             else:
                 return False
 
-    @command("note")
+    @command("note", filters.group)
     async def note_cmd(self, bot: Client, message: Message):
         try:
             note_name = message.text.split(" ", 1)[1]
@@ -112,7 +112,7 @@ class NotesExtension(ModuleExtension):
                 media_group[-1].parse_mode = ParseMode.MARKDOWN
             await bot.send_media_group(chat_id, media_group)
 
-    @command("notes")
+    @command("notes", filters.group)
     async def notes_cmd(self, bot: Client, message: Message):
         notes = await self.get_chat_notes(message.chat.id)
         chat_name = message.chat.title or message.chat.username
@@ -124,7 +124,7 @@ class NotesExtension(ModuleExtension):
             await message.reply(self.S["notes"]["no_notes"])
 
     @allowed_for(["chat_admins", "chat_owner"])
-    @command("addnote")
+    @command("addnote", filters.group)
     async def addnote_cmd(self, bot: Client, message: Message):
         if not message.reply_to_message:
             await message.reply(self.S["notes"]["reply_to_message"])
@@ -180,7 +180,7 @@ class NotesExtension(ModuleExtension):
         await message.reply(self.S["notes"]["note_added"].format(note_name=note_name))
 
     @allowed_for(["chat_admins", "chat_owner"])
-    @command("rmnote")
+    @command("rmnote", filters.group)
     async def rmnote_cmd(self, bot: Client, message: Message):
         try:
             note_name = message.text.split(" ", 1)[1]
