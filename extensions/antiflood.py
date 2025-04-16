@@ -16,7 +16,7 @@ class AntiFloodExtension(ModuleExtension):
         # In-memory storage for message timestamps: chat_id -> user_id -> deque of timestamps
         self.flood_data = defaultdict(lambda: defaultdict(deque))
         self.settings_cache = {}
-        self.bot.add_handler(MessageHandler(self.antiflood_handler, filters.group))
+        self.bot.add_handler(MessageHandler(self.antiflood_handler, filters.group), group=1)
 
     async def antiflood_handler(self, bot: Client, message: Message):
         """Handle all incoming messages to detect flooding."""
