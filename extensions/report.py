@@ -1,6 +1,6 @@
 from base.mod_ext import ModuleExtension
 from base.module import command
-from pyrogram import Client, errors
+from pyrogram import Client, errors, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.enums import ChatMembersFilter, ChatMemberStatus
 import time
@@ -13,7 +13,7 @@ class ReportExtension(ModuleExtension):
         super().__init__(module)
         self.last_report_times = {}
     
-    @command("report")
+    @command("report", filters.group)
     async def report_cmd(self, bot: Client, message: Message):
         if not await self.checks(bot, message):
             # self.logger.warning(f"Report check failed for {message.from_user.id}")
