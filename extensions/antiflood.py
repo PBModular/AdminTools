@@ -6,6 +6,7 @@ from ..extensions.warns import WarnsExtension
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
 from pyrogram.handlers import MessageHandler
+from pyrogram.enums import ChatMemberStatus
 from collections import deque, defaultdict
 from datetime import datetime, timedelta
 from sqlalchemy import select
@@ -13,8 +14,8 @@ from sqlalchemy import select
 
 class AntiFloodExtension(ModuleExtension):
     def on_init(self):
-        # In-memory storage for message timestamps: chat_id -> user_id -> deque of timestamps
-        self.flood_data = defaultdict(lambda: defaultdict(deque))
+        # In-memory storage: chat_id -> user_id -> {'deque': deque of (timestamp, identifier), 'identifiers': set}
+        self.flood_data = defaultdict(lambda: defaultdict(lambda: {'deque': deque(), 'identifiers': set()}))
         self.settings_cache = {}
 
     @property
@@ -24,7 +25,7 @@ class AntiFloodExtension(ModuleExtension):
         ]
 
     async def antiflood_handler(self, bot: Client, message: Message):
-        """Handle all incoming messages to detect flooding."""
+        """Handle all incoming messages to detect flooding, treating albums as single units."""
         chat_id = message.chat.id
 
         # Load settings if not cached
@@ -39,19 +40,30 @@ class AntiFloodExtension(ModuleExtension):
 
         user_id = message.from_user.id
         current_time = message.date
-        user_queue = self.flood_data[chat_id][user_id]
+        user_data = self.flood_data[chat_id][user_id]
+        deque = user_data['deque']
+        identifiers = user_data['identifiers']
 
-        while user_queue and (current_time - user_queue[0]).total_seconds() > settings.antiflood_time_frame:
-            user_queue.popleft()
+        while deque and (current_time - deque[0][0]).total_seconds() > settings.antiflood_time_frame:
+            _, old_identifier = deque.popleft()
+            identifiers.remove(old_identifier)
 
-        user_queue.append(current_time)
+        if message.media_group_id:
+            identifier = message.media_group_id
+        else:
+            identifier = message.id
+
+        if identifier not in identifiers:
+            deque.append((current_time, identifier))
+            identifiers.add(identifier)
 
         # Check for flooding
-        if len(user_queue) > settings.antiflood_message_limit:
+        if len(deque) > settings.antiflood_message_limit:
             member = await bot.get_chat_member(chat_id, user_id)
-            if member.status not in {"administrator", "creator"}:
+            if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
                 await self.take_antiflood_action(bot, message, settings)
-                user_queue.clear()  # Reset queue to prevent repeated actions
+                deque.clear()
+                identifiers.clear()
 
     async def take_antiflood_action(self, bot: Client, message: Message, settings):
         """Execute the configured action against the flooding user."""
