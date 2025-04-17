@@ -142,7 +142,7 @@ antiflood:
   user_warned: "{name} отримав(-ла) попередження за флуд. ({warn_count}/{warn_limit})"
   user_muted: "{name} був(-ла) змучений(-а) за флуд."
   user_banned: "{name} був(-ла) забанений(-а) за флуд."
-  invalid_subcommand: "Невірна підкоманда. Використовуйте /antiflood [status|enable|disable|set]"
+  invalid_subcommand: "Невірна підкоманда. Використовуйте /antiflood [enable|disable|set]"
   settings_not_found: "Налаштування чату не знайдено. Спочатку виконайте /start AdminTools."
   status:
     info: |
@@ -155,7 +155,14 @@ antiflood:
     action_permanent: "{action} назавжди"
   enabled: "Антифлуд увімкнено."
   disabled: "Антифлуд вимкнено."
-  set_usage: "Використання: /antiflood set <повідомлення> <секунди> <дія> [тривалість]"
+  set_usage: |
+      Використання: /antiflood set <messages> <seconds> <action> [duration]
+
+      Параметри:
+      - <messages>: Кількість повідомлень, дозволених протягом часового інтервалу. Має бути цілим числом.
+      - <seconds>: Часовий інтервал у секундах. Має бути цілим числом.
+      - <action>: Дія, яку слід виконати, коли ліміт перевищено. Повинна бути одна з "warn", "mute" або "ban".
+      - [duration]: Необов'язково. Застосовується лише для "mute" та "ban". Тривалість у секундах. Має бути цілим числом. Якщо не вказано або встановлено на 0, дія буде постійною.
   invalid_action: "Невірна дія. Має бути 'warn', 'mute' або 'ban'."
   invalid_params: "Невірні параметри. Повідомлення, секунди та тривалість повинні бути цілими числами."
   settings_updated: "Налаштування антифлуду оновлено."

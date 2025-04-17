@@ -202,7 +202,7 @@ antiflood:
   user_warned: "{name} has been warned for flooding. ({warn_count}/{warn_limit})"
   user_muted: "{name} has been muted for flooding."
   user_banned: "{name} has been banned for flooding."
-  invalid_subcommand: "Invalid subcommand. Use /antiflood [status|enable|disable|set]"
+  invalid_subcommand: "Invalid subcommand. Use /antiflood [enable|disable|set]"
   settings_not_found: "Chat settings not found. Run /start AdminTools first."
   status:
     info: |
@@ -215,7 +215,14 @@ antiflood:
     action_permanent: "{action} permanently"
   enabled: "AntiFlood has been enabled."
   disabled: "AntiFlood has been disabled."
-  set_usage: "Usage: /antiflood set <messages> <seconds> <action> [duration]"
+  set_usage: |
+      Usage: /antiflood set <messages> <seconds> <action> [duration]
+
+      Parameters:
+      - <messages>: The number of messages allowed within the time frame. Must be an integer.
+      - <seconds>: The time frame in seconds. Must be an integer.
+      - <action>: The action to take when the limit is exceeded. Must be one of 'warn', 'mute', or 'ban'.
+      - [duration]: Optional. Only applicable for 'mute' and 'ban'. The duration in seconds. Must be an integer. If not provided or set to 0, the action is permanent.
   invalid_action: "Invalid action. Must be 'warn', 'mute', or 'ban'."
   invalid_params: "Invalid parameters. Messages, seconds, and duration must be integers."
   settings_updated: "AntiFlood settings updated."

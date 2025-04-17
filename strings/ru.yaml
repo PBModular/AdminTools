@@ -202,7 +202,7 @@ antiflood:
   user_warned: "{name} получил(-а) предупреждение за флуд. ({warn_count}/{warn_limit})"
   user_muted: "{name} был(-а) заглушен(-а) за флуд."
   user_banned: "{name} был(-а) забанен(-а) за флуд."
-  invalid_subcommand: "Неверная подкоманда. Используйте /antiflood [status|enable|disable|set]"
+  invalid_subcommand: "Неверная подкоманда. Используйте /antiflood [enable|disable|set]"
   settings_not_found: "Настройки чата не найдены. Сначала выполните /start AdminTools."
   status:
     info: |
@@ -215,7 +215,14 @@ antiflood:
     action_permanent: "{action} навсегда"
   enabled: "Антифлуд включен."
   disabled: "Антифлуд выключен."
-  set_usage: "Использование: /antiflood set <сообщения> <секунды> <действие> [длительность]"
+  set_usage: |
+      Использование: /antiflood set <messages> <seconds> <action> [duration]
+
+      Параметры:
+      - <messages>: Количество сообщений, разрешенных в течение временного интервала. Должно быть целым числом.
+      - <seconds>: Временной интервал в секундах. Должно быть целым числом.
+      - <action>: Действие, которое следует выполнить, когда лимит превышен. Должно быть одно из "warn", "mute" или "ban".
+      - [duration]: Необязательно. Применяется только для "mute" и "ban". Продолжительность в секундах. Должна быть целым числом. Если не указано или установлено на 0, действие будет постоянным.
   invalid_action: "Неверное действие. Должно быть 'warn', 'mute' или 'ban'."
   invalid_params: "Неверные параметры. Сообщения, секунды и длительность должны быть целыми числами."
   settings_updated: "Настройки антифлуда обновлены."
