@@ -31,14 +31,13 @@ class PurgeExtension(ModuleExtension):
             )
             return
 
-        msg_count = message.id - message.reply_to_message.id
+        msg_ids = list(range(message.reply_to_message.id, message.id + 1))
         count = 0
-        while msg_count > 0:
+        for chunk in [msg_ids[i:i + 100] for i in range(0, len(msg_ids), 100)]:
             count += await bot.delete_messages(
                 chat_id=message.chat.id,
-                message_ids=range(message.id - msg_count, message.id + 1)
+                message_ids=chunk
             )
-            msg_count -= 100
 
         msg = await message.reply(text=self.S["purge"].format(count=count))
         await sleep(4)
