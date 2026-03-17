@@ -21,14 +21,15 @@ async def base_checks(self, message: Message) -> Optional[User]:
         await message.reply(self.S["nice_try"])
         return
 
-    return user
+    return user, me
 
 
 async def restrict_check_message(self, message: Message) -> Optional[User]:
     member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
-    user = await base_checks(self, message, member)
-    if user is None:
+    result = await base_checks(self, message)
+    if result is None:
         return
+    user, me = result
 
     if not (member.status in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER}):
         await message.reply(self.S["not_admin"])
@@ -38,7 +39,6 @@ async def restrict_check_message(self, message: Message) -> Optional[User]:
         await message.reply(self.S["user_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>")
         return
 
-    me = await self.bot.get_me()
     me_member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=me.id)
     
     if (me_member.status not in {ChatMemberStatus.ADMINISTRATOR} or not me_member.privileges.can_restrict_members):
