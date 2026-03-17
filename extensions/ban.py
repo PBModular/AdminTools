@@ -16,7 +16,7 @@ class BanExtension(ModuleExtension):
         if user is None:
             return
 
-        status, user = await parse_user(bot, message)
+        status, _ = await parse_user(bot, message)
 
         args = message.text.split()
         delta = None
