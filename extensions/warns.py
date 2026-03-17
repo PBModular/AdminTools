@@ -168,7 +168,9 @@ class WarnsExtension(ModuleExtension):
             warn_limit = await session.scalar(select(ChatSettings.warn_limit).filter_by(chat_id=message.chat.id))
             if not db_user or db_user.count == 0:
                 await message.reply(self.S["warn"]["no_warns_call"].format(user=name))
-            elif warn_limit:
+            else:
+                if warn_limit is None:
+                    return
                 reasons = db_user.reasons.split(",")
                 dates = db_user.dates.split(",")
                 
