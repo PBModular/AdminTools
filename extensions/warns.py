@@ -76,7 +76,7 @@ class WarnsExtension(ModuleExtension):
             
             db_user = await session.scalar(select(Warns).filter_by(chat_id=chat_id, user_id=user_id))
             if not db_user:
-                db_user = Warns(chat_id=chat_id, user_id=user_id, count=0)
+                db_user = Warns(chat_id=chat_id, user_id=user_id, count=0, reasons="", dates="")
                 session.add(db_user)
             else:
                 if db_settings.warn_autoreset and db_settings.warn_autoreset_time > 0 and db_user.last_warn_time:
