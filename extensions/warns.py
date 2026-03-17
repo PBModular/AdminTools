@@ -236,11 +236,6 @@ class WarnsExtension(ModuleExtension):
             db_settings = await session.scalar(select(ChatSettings).filter_by(chat_id=message.chat.id))
             if not db_settings:
                 return
-            
-            if not hasattr(db_settings, 'warn_autoreset'):
-                await message.reply(self.S["warn"]["autoreset"]["not_configured"])
-                return
-                
             if not db_settings.warn_autoreset:
                 await message.reply(self.S["warn"]["autoreset"]["status_disabled"])
             else:
