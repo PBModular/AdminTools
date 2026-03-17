@@ -33,6 +33,8 @@ async def parse_user(bot: Client, message: Message) -> (UserParseStatus, Optiona
         return UserParseStatus.OK_MENTION, user
 
     if message.reply_to_message is not None:
+        if message.reply_to_message.from_user is None:
+            return UserParseStatus.NO_REPLY, None
         return UserParseStatus.OK_REPLY, message.reply_to_message.from_user
 
     if has_mention and message.reply_to_message is None:
