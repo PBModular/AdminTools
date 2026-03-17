@@ -94,7 +94,11 @@ class WarnsExtension(ModuleExtension):
             db_user.dates = f"{db_user.dates},{current_date}" if db_user.dates else current_date
 
             if db_user.count >= db_settings.warn_limit:
-                restriction = await self._apply_restriction(bot, chat_id, user_id, db_settings)
+                try:
+                    restriction = await self._apply_restriction(bot, chat_id, user_id, db_settings)
+                except Exception as e:
+                    self.logger.error(f"Failed to apply restriction for user {user_id} in {chat_id}: {e}")
+                    restriction = db_settings.warn_restriction
                 await session.delete(db_user)
                 await session.commit()
                 return {
