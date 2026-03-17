@@ -90,7 +90,7 @@ class ReportExtension(ModuleExtension):
             await message.reply(self.S["user_not_found"])
             return False
         
-        if user_id == reply_user_id or user_id == reply_user_id:
+        if user_id == reply_user_id:
             await message.reply(self.S["report"]["yourself"])
             return False
         
