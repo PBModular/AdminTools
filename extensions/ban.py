@@ -12,7 +12,8 @@ from babel.dates import format_timedelta
 class BanExtension(ModuleExtension):
     @command("ban", filters.group)
     async def ban_cmd(self, bot: Client, message: Message):
-        if await restrict_check_message(self, message) is None:
+        user = await restrict_check_message(self, message)
+        if user is None:
             return
 
         status, user = await parse_user(bot, message)
