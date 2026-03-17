@@ -21,7 +21,7 @@ class ReportExtension(ModuleExtension):
         chat_id = message.chat.id
         chat_title = message.chat.title or message.chat.username or message.chat.first_name
         user = message.from_user.mention
-        reported_msg = message.reply_to_message_id
+        reported_msg = message.reply_to_message.id
         
         if message.reply_to_message and message.reply_to_message.text:
             reported_text = message.reply_to_message.text
