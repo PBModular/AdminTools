@@ -157,7 +157,7 @@ class NotesExtension(ModuleExtension):
                     media_group = await bot.get_media_group(reply_message.chat.id, reply_message.id)
                     note_content = ""
                     for media_message in media_group:
-                        media = media_message.photo or media_message.video or media_message.document or media_message.audio or reply_message.animation
+                        media = media_message.photo or media_message.video or media_message.document or media_message.audio or media_message.animation
                         if media:
                             file_type = media.__class__.__name__.lower()
                             note_content += f"{file_type}:{media.file_id}\n---\n"
