@@ -28,7 +28,8 @@ class ReportExtension(ModuleExtension):
         else:
             reported_text = message.reply_to_message
 
-        reported_user = message.reply_to_message.from_user.mention
+        reply_from = message.reply_to_message.from_user
+        reported_user = reply_from.mention if reply_from else message.reply_to_message.sender_chat.title if message.reply_to_message.sender_chat else "Unknown"
         reason = " ".join(message.command[1:])
         
         button_url = f"https://t.me/c/{str(chat_id)[4:]}/{reported_msg}"
@@ -74,8 +75,13 @@ class ReportExtension(ModuleExtension):
         
         chat_id = message.chat.id
         user_id = message.from_user.id
-        reply_user_id = message.reply_to_message.from_user.id
-        is_bot = message.reply_to_message.from_user.is_bot
+        reply_from = message.reply_to_message.from_user
+        if reply_from is None:
+            await message.reply(self.S["report"]["not_reply"])
+            return False
+
+        reply_user_id = reply_from.id
+        is_bot = reply_from.is_bot
 
         try:
             reply_member = await bot.get_chat_member(chat_id=chat_id, user_id=reply_user_id)
