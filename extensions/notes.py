@@ -10,8 +10,6 @@ from sqlalchemy import select, exc
 
 
 class NotesExtension(ModuleExtension):
-    def on_init(self):
-        self.notes = {}
 
     @property
     def custom_handlers(self) -> list[Handler]:
