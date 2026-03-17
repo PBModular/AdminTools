@@ -17,7 +17,7 @@ class UserParseStatus(Enum):
 async def parse_user(bot: Client, message: Message) -> (UserParseStatus, Optional[User]):
     user = None
     has_mention = False
-    for ent in message.entities:
+    for ent in (message.entities or []):
         if ent.type == MessageEntityType.TEXT_MENTION:
             user = ent.user
             break
