@@ -28,7 +28,7 @@ class WarnsExtension(ModuleExtension):
 
         if message.reply_to_message:
             args = message.text.split(maxsplit=1)
-            reason = args[1].split()[:10] if len(args) > 1 else self.S["warn"]["no_reason"]
+            reason = " ".join(args[1].split()[:10]) if len(args) > 1 else self.S["warn"]["no_reason"]
         else:
             args = message.text.split(maxsplit=2)
             reason = args[2] if len(args) > 2 else self.S["warn"]["no_reason"]
