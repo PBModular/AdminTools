@@ -6,7 +6,7 @@ from .utils import parse_user, UserParseStatus
 from typing import Optional
 
 
-async def base_checks(self, message: Message, member: ChatMember) -> Optional[User]:
+async def base_checks(self, message: Message) -> Optional[User]:
     status, user = await parse_user(self.bot, message)
     if status == UserParseStatus.INVALID_MENTION:
         await message.reply(self.S["user_not_found"], quote=True)
