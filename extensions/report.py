@@ -8,9 +8,8 @@ import time
 
 class ReportExtension(ModuleExtension):
     report_cooldown = 60
-    
-    def __init__(self, module):
-        super().__init__(module)
+
+    def on_init(self):
         self.last_report_times = {}
     
     @command("report", filters.group)
