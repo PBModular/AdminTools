@@ -173,8 +173,10 @@ class WarnsExtension(ModuleExtension):
                     return
                 reasons = db_user.reasons.split(",")
                 dates = db_user.dates.split(",")
-                
-                warn_list = "\n".join([f"{i+1}. <code>{dates[i]}</code>, {self.S["warn"]["reason"]} {reasons[i]}" for i in range(len(reasons))])
+                warn_list = "\n".join(
+                    f"{i+1}. <code>{dates[i]}</code>, {self.S['warn']['reason']} {reasons[i]}"
+                    for i in range(len(reasons))
+                )
                 await message.reply(self.S["warn"]["status"].format(user=name, cur=db_user.count, total=warn_limit, warn_list=warn_list))
 
     @command("resetwarns", filters.group)
