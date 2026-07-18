@@ -4,9 +4,17 @@ from ..checks import restrict_check_message
 from ..utils import parse_timedelta, parse_user, UserParseStatus
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram.enums import ChatType, ChatMemberStatus
+from pyrogram.enums import ChatType, ChatMemberStatus, ChatMembersFilter, MessageEntityType
 from datetime import datetime
 from babel.dates import format_timedelta
+from typing import Optional
+
+
+def _extract_mentioned_username(message: Message) -> Optional[str]:
+    for ent in (message.entities or []):
+        if ent.type == MessageEntityType.MENTION:
+            return message.text[ent.offset + 1:ent.offset + ent.length]
+    return None
 
 
 class BanExtension(ModuleExtension):
@@ -51,7 +59,31 @@ class BanExtension(ModuleExtension):
             await message.reply(self.S["not_supergroup"])
             return
 
-        user = await restrict_check_message(self, message)
+        status, user = await parse_user(bot, message)
+
+        if status == UserParseStatus.INVALID_MENTION:
+            username = _extract_mentioned_username(message)
+            if username:
+                try:
+                    async for member in bot.get_chat_members(
+                        message.chat.id, query=username, filter=ChatMembersFilter.BANNED
+                    ):
+                        if member.user.username and member.user.username.lower() == username.lower():
+                            user = member.user
+                            status = UserParseStatus.OK_MENTION
+                            break
+                except Exception:
+                    pass
+
+        if status == UserParseStatus.INVALID_MENTION:
+            await message.reply(self.S["user_not_found"], quote=True)
+            return
+
+        if status == UserParseStatus.NO_REPLY:
+            await message.reply(self.S["no_reply"], quote=True)
+            return
+
+        user = await restrict_check_message(self, message, require_participant=False, resolved_user=user)
         if user is None:
             return
 

@@ -6,15 +6,18 @@ from .utils import parse_user, UserParseStatus
 from typing import Optional
 
 
-async def base_checks(self, message: Message) -> Optional[User]:
-    status, user = await parse_user(self.bot, message)
-    if status == UserParseStatus.INVALID_MENTION:
-        await message.reply(self.S["user_not_found"], quote=True)
-        return
+async def base_checks(self, message: Message, resolved_user: Optional[User] = None) -> Optional[tuple]:
+    if resolved_user is not None:
+        user = resolved_user
+    else:
+        status, user = await parse_user(self.bot, message)
+        if status == UserParseStatus.INVALID_MENTION:
+            await message.reply(self.S["user_not_found"], quote=True)
+            return
 
-    if status == UserParseStatus.NO_REPLY:
-        await message.reply(self.S["no_reply"], quote=True)
-        return
+        if status == UserParseStatus.NO_REPLY:
+            await message.reply(self.S["no_reply"], quote=True)
+            return
 
     me = await self.bot.get_me()
     if user.id == me.id or user.id == message.from_user.id:
@@ -24,9 +27,11 @@ async def base_checks(self, message: Message) -> Optional[User]:
     return user, me
 
 
-async def restrict_check_message(self, message: Message) -> Optional[User]:
+async def restrict_check_message(
+    self, message: Message, require_participant: bool = True, resolved_user: Optional[User] = None
+) -> Optional[User]:
     member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
-    result = await base_checks(self, message)
+    result = await base_checks(self, message, resolved_user=resolved_user)
     if result is None:
         return
     user, me = result
@@ -44,6 +49,9 @@ async def restrict_check_message(self, message: Message) -> Optional[User]:
     if (me_member.status not in {ChatMemberStatus.ADMINISTRATOR} or not me_member.privileges.can_restrict_members):
         await message.reply(self.S["bot_insufficient_rights"] + f"- <code>{self.S['rights']['restrict_members']}</code>")
         return
+
+    if not require_participant:
+        return user
 
     try:
         affect_member = await self.bot.get_chat_member(chat_id=message.chat.id, user_id=user.id)

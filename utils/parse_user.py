@@ -24,7 +24,7 @@ async def parse_user(bot: Client, message: Message) -> (UserParseStatus, Optiona
         elif ent.type == MessageEntityType.MENTION:
             try:
                 user = await bot.get_users(message.text[ent.offset:ent.offset + ent.length])
-            except BadRequest:
+            except (BadRequest, IndexError, KeyError):
                 pass
             has_mention = True
             break
