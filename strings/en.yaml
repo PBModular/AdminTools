@@ -45,6 +45,7 @@ kick: "{0}, go away!"
 affect_self: "Well, it's your choice…"
 
 mute:
+  not_muted: "{user} isn't muted."
   illegal_usage: |
     You should specify time in format
     <code>#&lt;s/m/h/d&gt;</code>

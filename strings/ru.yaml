@@ -45,6 +45,7 @@ kick: "{0}, на выход!"
 affect_self: "Ну, это твое решение…"
 
 mute:
+  not_muted: "{user} не заглушен."
   illegal_usage: |
     Для использования необходимо указать время в формате
     <code>#&lt;s/m/h/d&gt;</code>

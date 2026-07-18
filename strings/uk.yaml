@@ -22,6 +22,7 @@ ban:
 unban: Гаразд, {0} може приєднатися знову
 kick: '{0}, забирайся звідси!'
 mute:
+  not_muted: "{user} не заглушений."
   ok_forever: <b>Заткнися!</b> {user} замовк!
   ok: <b>Замовкни!</b> {user} замовкне на <b>{time}!</b>
   illegal_usage: "Ви повинні вказати час у форматі\n<code>#&lt;s/m/h/d&gt;</code>\n\

@@ -4,6 +4,7 @@ from ..checks import restrict_check_message
 from ..utils import parse_timedelta, parse_user, UserParseStatus
 from pyrogram import Client, filters
 from pyrogram.types import Message, ChatPermissions
+from pyrogram.enums import ChatMemberStatus
 from datetime import datetime
 from babel.dates import format_timedelta
 
@@ -50,11 +51,22 @@ class MuteExtension(ModuleExtension):
         if user is None:
             return
 
+        name = f"@{user.username}" if user.username else user.first_name
+
+        affect_member = await bot.get_chat_member(chat_id=message.chat.id, user_id=user.id)
+        is_muted = (
+            affect_member.status == ChatMemberStatus.RESTRICTED
+            and affect_member.permissions is not None
+            and not affect_member.permissions.can_send_messages
+        )
+        if not is_muted:
+            await message.reply(self.S["mute"]["not_muted"].format(user=name), quote=True)
+            return
+
         await bot.restrict_chat_member(
             chat_id=message.chat.id,
             user_id=user.id,
             permissions=message.chat.permissions
         )
 
-        name = f"@{user.username}" if user.username else user.first_name
         await message.reply(self.S["unmute"].format(user=name))
